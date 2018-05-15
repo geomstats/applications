@@ -11,12 +11,14 @@ import geomstats.spd_matrices_space as spd_space
 SPACE = spd_space.SPDMatricesSpace(dimension=28)
 
 
-graphs = pd.DataFrame.from_csv("MRI/data/train_FNC.csv")
-map_FCN = pd.DataFrame.from_csv("MRI/AdditionalInformation/comp_ind_fMRI.csv", index_col=None)
+graphs = pd.DataFrame.from_csv("data/train_FNC.csv")
+map_FCN = pd.DataFrame.from_csv("AdditionalInformation/comp_ind_fMRI.csv",
+                                index_col=None)
 map_FCN = map_FCN['fMRI_comp_ind'].to_dict()
 map_FCN_r = {v: k for k, v in map_FCN.iteritems()}
-mapping = pd.DataFrame.from_csv("MRI/AdditionalInformation/rs_fMRI_FNC_mapping.csv")
-graph_labels = pd.DataFrame.from_csv("MRI/data/train_labels.csv")
+mapping = pd.DataFrame.from_csv("AdditionalInformation/rs_fMRI_FNC_mapping.csv")
+graph_labels = pd.DataFrame.from_csv(
+                                     "data/train_labels.csv")
 all_graphs = [None]*graphs.shape[0]
 all_targets = [None]*graphs.shape[0]
 vpos = np.vectorize(lambda x: max(0, x))
@@ -45,29 +47,39 @@ def Laplacian(A):
 def main():
     gamma = 1
     time_alg = {}
-    distance = {option: np.zeros((len(all_graphs), len(all_graphs))) for option in ["LED", "ED", "RD"]}
+    distance = {option: np.zeros((len(all_graphs), len(all_graphs)))
+                for option in ["LED", "ED", "RD"]}
     tic = time.time()
     for option in ["LED", "ED", "RD"]:
         tic = time.time()
         for i in range(1, len(all_graphs)):
-            hat_l1 = Laplacian(nx.adjacency_matrix(all_graphs[index_train[i]]).todense()) + gamma*np.eye(28)
+            hat_l1 = Laplacian(nx.adjacency_matrix(all_graphs[index_train[i]]).todense())\
+                     + gamma*np.eye(28)
+            Lambd, U = np.linalg.eigh(hat_l1)
+            invL1 = U.dot(np.diag(1.0/np.sqrt(Lambd)).dot(U.T))
             for j in range(i):
-                hat_l2 = Laplacian(nx.adjacency_matrix(all_graphs[index_train[j]]).todense()) + gamma*np.eye(28)
+                hat_l2 = Laplacian(nx.adjacency_matrix(
+                                   all_graphs[index_train[j]]).todense())\
+                        + gamma*np.eye(28)
                 if option == "LED":
                     distance[option][i, j] = np.linalg.norm(spd_space.group_log(hat_l1).squeeze(0)
-                                            - spd_space.group_log(hat_l2).squeeze(0), 'fro')
+                                                            - spd_space.group_log(hat_l2).squeeze(0),
+                                                            'fro')
                 elif option == "ED":
-                    distance[option][i, j] = np.linalg.norm(hat_l1 - hat_l2, 'fro')
+                    distance[option][i, j] = np.linalg.norm(hat_l1
+                                                            - hat_l2, 'fro')
                 else:
-                    distance[option][i, j] = np.linalg.norm(spd_space.SPDMetric(28).log(hat_l1, hat_l2).squeeze(0)
-                    - spd_space.SPDMetric(28).log(hat_l2, hat_l1).squeeze(0), 'fro')
+                    distance[option][i, j] = np.linalg.norm(
+                                             invL1.dot(spd_space.group_log(hat_l2).squeeze(0).dot(invL1)),
+                                             'fro')
         distance[option] = distance[option] + distance[option].T
         toc = time.time()
         time_alg[option] = toc-tic
 
     print("Done computing distances")
 
-    def fit_kernel_cv(log_euclidean_distance, labels, sigma=None, verbose=False):
+    def fit_kernel_cv(log_euclidean_distance, labels,
+                      sigma=None, verbose=False):
         kf = KFold(n_splits=10)
         perf = {}
         conf = {}
@@ -75,10 +87,13 @@ def main():
         sq = np.vectorize(lambda x: x**2)
         if sigma is not None:
             distance = np.exp(-sq(log_euclidean_distance)/(sigma**2))
-        else: distance = log_euclidean_distance
+        else:
+            distance = log_euclidean_distance
         for train_index, test_index in kf.split(range(len(labels))):
-            train_index, test_index = np.array(train_index), np.array(test_index)
-            X, X_test = np.array(distance[train_index, :])[:, train_index], np.array(distance[test_index, :])[:, train_index]
+            train_index = np.array(train_index)
+            test_index = np.array(test_index)
+            X = np.array(distance[train_index, :])[:, train_index]
+            X_test = np.array(distance[test_index, :])[:, train_index]
             clf = SVC(kernel='precomputed')
             clf.fit(X, labels[train_index])
             y_train = clf.predict(X)
@@ -95,8 +110,8 @@ def main():
         return perf, conf
 
     print("Starting SVM fitting.")
-    sigmas = list(np.arange(0.5, 10, 0.5))\
-            + [15, 20, 25, 30, 35, 40, 45, 50, 60, 80, 100, 120]
+    sigmas = list(np.arange(0.5, 10, 0.5))
+    sigmas += [15, 20, 25, 30, 35, 40, 45, 50, 60, 80, 100, 120]
     mean_acc = {}
     for option in ["LED", "ED", "RD"]:
         print("Option: ", option)
@@ -140,3 +155,4 @@ if __name__ == "__main__":
         linkage = hc.linkage(distance2, method='average')
         sb.clustermap(distance2, row_linkage=linkage, col_linkage=linkage,
                       cmap="coolwarm", xticklabels=labels, yticklabels=labels)
+ 
