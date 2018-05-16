@@ -100,16 +100,16 @@ def main():
     for option in DISTANCES:
         tic = time.time()
         for c, g in enumerate(all_graphs):
-            hat_l1 = laplacian(g) + gamma*np.eye(DIM_SPACE)
+            hat_l1 = laplacian(g) + gamma * np.eye(DIM_SPACE)
             lambda2, u = np.linalg.eigh(hat_l1)
             inv_l1 = u.dot(np.diag(1.0/np.sqrt(lambda2)).dot(u.T))
             for j in range(c):
-                hat_l2 = laplacian(all_graphs[j]) + gamma*np.eye(DIM_SPACE)
-                if option == "log_euclidean":
+                hat_l2 = laplacian(all_graphs[j]) + gamma * np.eye(DIM_SPACE)
+                if option == 'log_euclidean':
                     distance[option][c, j] = np.linalg.norm(spd_space.group_log(hat_l1).squeeze(0)
                                                             - spd_space.group_log(hat_l2).squeeze(0),
                                                             'fro')
-                elif option == "frobenius":
+                elif option == 'frobenius':
                     distance[option][c, j] = np.linalg.norm(hat_l1
                                                             - hat_l2, 'fro')
                 else:
@@ -159,7 +159,7 @@ def main():
     return distance, time_alg, perf_final, sigma_chosen, mean_acc, labels
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     distance, _, perf_final, sigma_chosen, mean_acc, labels = main()
     print("Final performance of the model on OOS test data:")
@@ -183,4 +183,4 @@ if __name__ == "__main__":
                            / (sigma_chosen[option]**2))
         linkage = hc.linkage(distance2, method='average')
         sb.clustermap(distance2, row_linkage=linkage, col_linkage=linkage,
-                      cmap="coolwarm", xticklabels=labels, yticklabels=labels)
+                      cmap='coolwarm', xticklabels=labels, yticklabels=labels)
