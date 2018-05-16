@@ -1,5 +1,5 @@
-import networkx as nx
 import numpy as np
+import np.linalg as lin
 import matplotlib.pyplot as plt
 import pandas as pd
 import time
@@ -8,132 +8,159 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import precision_score, accuracy_score
 from sklearn.metrics import f1_score, recall_score, confusion_matrix
 import geomstats.spd_matrices_space as spd_space
-SPACE = spd_space.SPDMatricesSpace(dimension=28)
+
+DIM_SPACE = 28
+RAND_SEED = 2018
+SPACE = spd_space.SPDMatricesSpace(dimension=DIM_SPACE)
+CORR_THRESH = 0.1
+GAMMA = 1.0
+NB_GRAPHS = 86
+SIGMAS = list(np.arange(0.5, 20, 0.5))
 
 
-graphs = pd.DataFrame.from_csv("data/train_FNC.csv")
-map_FCN = pd.DataFrame.from_csv("AdditionalInformation/comp_ind_fMRI.csv",
-                                index_col=None)
-map_FCN = map_FCN['fMRI_comp_ind'].to_dict()
-map_FCN_r = {v: k for k, v in map_FCN.iteritems()}
-mapping = pd.DataFrame.from_csv("AdditionalInformation/rs_fMRI_FNC_mapping.csv")
-graph_labels = pd.DataFrame.from_csv(
-                                     "data/train_labels.csv")
-all_graphs = [None]*graphs.shape[0]
-all_targets = [None]*graphs.shape[0]
-vpos = np.vectorize(lambda x: max(0, x))
-for i in range(graphs.shape[0]):
-    u = np.zeros((28, 28))
-    for ii in range(mapping.shape[0]):
-        a, b = (mapping.iloc[ii]["mapA"], mapping.iloc[ii]["mapB"])
-        u[map_FCN_r[a], map_FCN_r[b]] = graphs.iloc[i][ii]
-    u = np.multiply(u, (u > 0.0))
-    all_graphs[i] = nx.from_numpy_array(u + u.T)
-    all_targets[i] = graph_labels.loc[graphs.index[i], "Class"]
+def import_data():
+    graphs = pd.DataFrame.from_csv("data/train_FNC.csv")
+    n_graphs, _ = graphs.shape
+    map_FCN = pd.DataFrame.from_csv("AdditionalInformation/comp_ind_fMRI.csv",
+                                    index_col=None)
+    map_FCN = map_FCN['fMRI_comp_ind'].to_dict()
+    map_FCN_r = {v: k for k, v
+                 in map_FCN.iteritems()}
+    mapping = pd.DataFrame.from_csv("AdditionalInformation/" +
+                                    "rs_fMRI_FNC_mapping.csv")
+    graph_labels = pd.DataFrame.from_csv("data/train_labels.csv")
+    all_graphs = [None]*n_graphs
+    all_targets = [None]*n_graphs
+    for i in range(n_graphs):
+        u = np.zeros((DIM_SPACE, DIM_SPACE))
+        for ii in range(mapping.shape[0]):
+            a, b = (mapping.iloc[ii]["mapA"], mapping.iloc[ii]["mapB"])
+            u[map_FCN_r[a], map_FCN_r[b]] = graphs.iloc[i][ii]
+            u = np.multiply(u, (u > CORR_THRESH))
+        all_graphs[i] = np.abs(u + u.T)
+        all_targets[i] = graph_labels.loc[graphs.index[i], "Class"]
+
+    np.random.seed(RAND_SEED)
+    index_train = range(len(all_graphs))
+    np.random.shuffle(index_train)
+    stop = int(0.85 * len(all_graphs))
+    labels = np.array(all_targets[index_train])
+    return graphs.iloc[:, index_train], [all_graphs[t] for t in index_train],\
+        labels, stop, index_train
 
 
-np.random.seed(2018)
-index_train = range(len(all_graphs))
-np.random.shuffle(index_train)
-T = int(0.85*len(all_graphs))
-labels = np.array([all_targets[t] for t in index_train])
-
-
-def Laplacian(A):
+def laplacian(A):
     D = np.diag(np.array(A.sum(1)).flatten())
     return D-A
 
 
+def fit_kernel_cv(log_euclidean_distance, labels,
+                  sigma=None, verbose=False):
+    kf = KFold(n_splits=10)
+    perf = {}
+    conf = {}
+    k = 0
+    if sigma is not None:
+        distance = np.exp(- np.square(log_euclidean_distance)/(sigma**2))
+    else:
+        distance = log_euclidean_distance
+    for train_index, test_index in kf.split(range(len(labels))):
+        train_index = np.array(train_index)
+        test_index = np.array(test_index)
+        x = np.array(distance[train_index, :])[:, train_index]
+        x_test = np.array(distance[test_index, :])[:, train_index]
+        clf = SVC(kernel='precomputed')
+        clf.fit(x, labels[train_index])
+        y_train = clf.predict(x)
+        if verbose:
+            print("Training accuracy:",
+                  accuracy_score(labels[train_index], y_train))
+        y_test = clf.predict(x_test)
+        perf[k] = {'acc': accuracy_score(labels[test_index], y_test),
+                   'prec': precision_score(labels[test_index], y_test),
+                   'f1': f1_score(labels[test_index], y_test),
+                   'recall': recall_score(labels[test_index], y_test)}
+        conf[k] = confusion_matrix(labels[test_index], y_test)
+        k += 1
+        return perf, conf
+
+
 def main():
-    gamma = 1
+    gamma = GAMMA
     time_alg = {}
+    graphs, all_graphs, labels, stop, index_train = import_data()
     distance = {option: np.zeros((len(all_graphs), len(all_graphs)))
                 for option in ["LED", "ED", "RD"]}
     tic = time.time()
     for option in ["LED", "ED", "RD"]:
         tic = time.time()
         for i in range(1, len(all_graphs)):
-            hat_l1 = Laplacian(nx.adjacency_matrix(all_graphs[index_train[i]]).todense())\
-                     + gamma*np.eye(28)
-            Lambd, U = np.linalg.eigh(hat_l1)
+            hat_l1 = laplacian(all_graphs[i]) + gamma*np.eye(DIM_SPACE)
+            Lambd, U = lin.eigh(hat_l1)
             invL1 = U.dot(np.diag(1.0/np.sqrt(Lambd)).dot(U.T))
             for j in range(i):
-                hat_l2 = Laplacian(nx.adjacency_matrix(
-                                   all_graphs[index_train[j]]).todense())\
-                        + gamma*np.eye(28)
+                hat_l2 = laplacian(all_graphs[j]) + gamma*np.eye(DIM_SPACE)
                 if option == "LED":
-                    distance[option][i, j] = np.linalg.norm(spd_space.group_log(hat_l1).squeeze(0)
-                                                            - spd_space.group_log(hat_l2).squeeze(0),
-                                                            'fro')
+                    distance[option][i, j] = lin.norm(spd_space.group_log(hat_l1).squeeze(0)
+                                                      - spd_space.group_log(hat_l2).squeeze(0),
+                                                      'fro')
                 elif option == "ED":
-                    distance[option][i, j] = np.linalg.norm(hat_l1
-                                                            - hat_l2, 'fro')
+                    distance[option][i, j] = lin.norm(hat_l1
+                                                      - hat_l2, 'fro')
                 else:
-                    distance[option][i, j] = np.linalg.norm(
+                    distance[option][i, j] = lin.norm(
                                              invL1.dot(spd_space.group_log(hat_l2).squeeze(0).dot(invL1)),
                                              'fro')
         distance[option] = distance[option] + distance[option].T
         toc = time.time()
         time_alg[option] = toc-tic
-
     print("Done computing distances")
 
-    def fit_kernel_cv(log_euclidean_distance, labels,
-                      sigma=None, verbose=False):
-        kf = KFold(n_splits=10)
-        perf = {}
-        conf = {}
-        k = 0
-        sq = np.vectorize(lambda x: x**2)
-        if sigma is not None:
-            distance = np.exp(-sq(log_euclidean_distance)/(sigma**2))
-        else:
-            distance = log_euclidean_distance
-        for train_index, test_index in kf.split(range(len(labels))):
-            train_index = np.array(train_index)
-            test_index = np.array(test_index)
-            X = np.array(distance[train_index, :])[:, train_index]
-            X_test = np.array(distance[test_index, :])[:, train_index]
-            clf = SVC(kernel='precomputed')
-            clf.fit(X, labels[train_index])
-            y_train = clf.predict(X)
-            if verbose:
-                print("Training accuracy:",
-                      accuracy_score(labels[train_index], y_train))
-            y_test = clf.predict(X_test)
-            perf[k] = {'acc': accuracy_score(labels[test_index], y_test),
-                       'prec': precision_score(labels[test_index], y_test),
-                       'f1': f1_score(labels[test_index], y_test),
-                       'recall': recall_score(labels[test_index], y_test)}
-            conf[k] = confusion_matrix(labels[test_index], y_test)
-            k += 1
-        return perf, conf
-
-    print("Starting SVM fitting.")
-    sigmas = list(np.arange(0.5, 10, 0.5))
-    sigmas += [15, 20, 25, 30, 35, 40, 45, 50, 60, 80, 100, 120]
+    print("Starting SVM fitting with Cross Validation")
+    sigmas = SIGMAS
     mean_acc = {}
     for option in ["LED", "ED", "RD"]:
         print("Option: ", option)
         mean_acc[option] = []
-        perf, conf = fit_kernel_cv(distance[option][:T, :T],
-                                   labels[:T], sigma=None, verbose=False)
+        perf, conf = fit_kernel_cv(distance[option][:stop, :stop],
+                                   labels[:stop], sigma=None, verbose=False)
         mean_acc[option].append(np.mean([perf[k]['acc'] for k in perf.keys()]))
         for sigma in sigmas:
-                print(sigma)
-                perf, conf = fit_kernel_cv(distance[option][:T, :T],
-                                           labels[:T], sigma, verbose=False)
-                mean_acc[option].append(np.mean([perf[k]['acc']
-                                        for k in perf.keys()]))
+            perf, conf = fit_kernel_cv(distance[option][:stop, :stop],
+                                       labels[:stop], sigma, verbose=False)
+            mean_acc[option].append(np.mean([perf[k]['acc']
+                                             for k in perf.keys()]))
 
-    return distance, mean_acc
+    print("Fitting SVM on full data and evaluation on OOS set.")
+    model = {}
+    perf_final = {}
+    sigma_chosen = {}
+    for option in ['LED', 'ED', 'RD']:
+        sigma_chosen[option] = sigmas[np.argmax(mean_acc[option])] - 1
+        distance2 = np.exp(- np.square(distance[option])
+                           / (sigma_chosen[option]**2))
+        x = np.array(distance2[:stop, :])[:, :stop]
+        x_test = np.array(distance2[stop:, :])[:, :stop]
+        clf = SVC(kernel='precomputed')
+        clf.fit(x, labels[:stop])
+        model[option] = clf
+        y_test = clf.predict(x_test)
+        print(y_test)
+        perf_final[option] = {'acc': accuracy_score(labels[stop:], y_test),
+                              'prec': precision_score(labels[stop:], y_test),
+                              'f1': f1_score(labels[stop:], y_test),
+                              'recall': recall_score(labels[stop:], y_test)}
+
+    return distance, time_alg, perf_final, sigma_chosen, mean_acc, labels
 
 
 if __name__ == "__main__":
 
-    distance, mean_acc = main()
-    sigmas = list(np.arange(0.5, 10, 0.5)) + \
-        [15, 20, 25, 30, 35, 40, 45, 50, 60, 80, 100, 120]
+    distance, _, perf_final, sigma_chosen, mean_acc, labels = main()
+    sigmas = SIGMAS
+    print("Final performance of the model on OOS test data:")
+    print(pd.DataFrame.from_dict(perf_final))
+
     # Plot CV accuracy
     fig, ax = plt.subplots(figsize=(6, 4))
     plt.plot(sigmas, mean_acc['LED'][1:],
@@ -145,14 +172,14 @@ if __name__ == "__main__":
     plt.legend(loc="center left", bbox_to_anchor=(1.0, 0.5), fontsize=18)
     plt.xlabel(r'$\sigma$', fontsize=24)
     plt.ylabel(r'CV accuracy', fontsize=20)
+
+    # Plot Clustermap representation
     import seaborn as sb
     import scipy.cluster.hierarchy as hc
     for option in ['LED', 'ED', 'RD']:
-        sigma = sigmas[np.argmax(mean_acc[option])]
-        sq = np.vectorize(lambda x: x**2)
         plt.figure()
-        distance2 = np.exp(-sq(distance[option])/(sigma**2))
+        distance2 = np.exp(-np.square(distance[option])
+                           / (sigma_chosen[option]**2))
         linkage = hc.linkage(distance2, method='average')
         sb.clustermap(distance2, row_linkage=linkage, col_linkage=linkage,
                       cmap="coolwarm", xticklabels=labels, yticklabels=labels)
- 
