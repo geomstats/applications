@@ -2,10 +2,10 @@ import geomstats.spd_matrices_space as spd_space
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.svm import SVC
-from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.metrics import f1_score, precision_score, recall_score 
+from sklearn.model_selection import KFold
+from sklearn.svm import SVC
 import time
 
 DIM_SPACE = 28
@@ -19,12 +19,12 @@ SIGMAS = list(np.arange(0.5, 20, 0.5))
 
 def import_data():
     graphs = pd.DataFrame.from_csv("data/train_fnc.csv")
-    map_FCN = pd.DataFrame.from_csv("additional_info/comp_ind_fmri.csv",
+    map_FCN = pd.DataFrame.from_csv("add_info/comp_ind_fmri.csv",
                                     index_col=None)
     map_FCN = map_FCN['fMRI_comp_ind'].to_dict()
     map_FCN_r = {v: k for k, v
                  in map_FCN.iteritems()}
-    mapping = pd.DataFrame.from_csv("additional_info/" +
+    mapping = pd.DataFrame.from_csv("add_info/" +
                                     "rs_fmri_fnc_mapping.csv")
     graph_labels = pd.DataFrame.from_csv("data/train_labels.csv")
     all_graphs = [None] * n_graphs
