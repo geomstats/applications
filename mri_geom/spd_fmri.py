@@ -1,3 +1,9 @@
+"""This file provides is an example of the application of GEOMSTAT on the space 
+of SDP matrices. 
+The goal here is to classify a set of 86 brain connectomes 
+represented by their SPD regularized Laplacian (with parameter GAMMA)
+into two classes: control vs people suffering from schizophrenia.
+""""
 import geomstats.spd_matrices_space as spd_space
 import matplotlib.pyplot as plt
 import numpy as np
@@ -89,7 +95,27 @@ def fit_kernel_cv(log_euclidean_distance, labels,
         k += 1
         return perf, conf
 
-
+def compute_similarities(all_graphs,option):
+    distance = np.zeros((NB_GRAPHS,NB_GRAPHS))
+    for c, g in enumerate(all_graphs):
+            hat_l1 = laplacian(g) + gamma * np.eye(DIM_SPACE)
+            lambda2, u = np.linalg.eigh(hat_l1)
+            inv_l1 = u.dot(np.diag(1.0/np.sqrt(lambda2)).dot(u.T))
+            for j in range(c):
+                hat_l2 = laplacian(all_graphs[j]) + gamma * np.eye(DIM_SPACE)
+                if option == 'log_euclidean':
+                    distance[c, j] = np.linalg.norm(spd_space.group_log(hat_l1).squeeze(0)
+                                                    - spd_space.group_log(hat_l2).squeeze(0),
+                                                    'fro')
+                elif option == 'frobenius':
+                    distance[c, j] = np.linalg.norm(hat_l1
+                                                    - hat_l2, 'fro')
+                else:
+                    distance[c, j] = np.linalg.norm(
+                                                    inv_l1.dot(spd_space.group_log(hat_l2).squeeze(0).dot(inv_l1)),
+                                                    'fro')
+    return distance + distance.T
+        
 def main():
     gamma = GAMMA
     time_alg = {}
@@ -99,49 +125,28 @@ def main():
     tic = time.time()
     for option in DISTANCES:
         tic = time.time()
-        for c, g in enumerate(all_graphs):
-            hat_l1 = laplacian(g) + gamma * np.eye(DIM_SPACE)
-            lambda2, u = np.linalg.eigh(hat_l1)
-            inv_l1 = u.dot(np.diag(1.0/np.sqrt(lambda2)).dot(u.T))
-            for j in range(c):
-                hat_l2 = laplacian(all_graphs[j]) + gamma * np.eye(DIM_SPACE)
-                if option == 'log_euclidean':
-                    distance[option][c, j] = np.linalg.norm(spd_space.group_log(hat_l1).squeeze(0)
-                                                            - spd_space.group_log(hat_l2).squeeze(0),
-                                                            'fro')
-                elif option == 'frobenius':
-                    distance[option][c, j] = np.linalg.norm(hat_l1
-                                                            - hat_l2, 'fro')
-                else:
-                    distance[option][c, j] = np.linalg.norm(
-                                                            inv_l1.dot(spd_space.group_log(hat_l2).squeeze(0).dot(inv_l1)),
-                                                            'fro')
-        distance[option] = distance[option] + distance[option].T
+        distance[option] = compute_similarities(all_graphs,option)
         toc = time.time()
         time_alg[option] = toc-tic
-    print("Done computing distances")
+    print('Done computing distances')
 
-    print("Starting SVM fitting with Cross Validation")
+    print('Starting SVM fitting with Cross Validation')
     sigmas = SIGMAS
     mean_acc = {}
     for option in DISTANCES:
-        print("Option: ", option)
-        mean_acc[option] = []
-        perf, conf = fit_kernel_cv(distance[option][:stop, :stop],
-                                   labels[:stop], sigma=None, verbose=False)
-        mean_acc[option].append(np.mean([perf[k]['acc'] for k in perf.keys()]))
+        print('Option: ', option)
         for sigma in sigmas:
             perf, conf = fit_kernel_cv(distance[option][:stop, :stop],
                                        labels[:stop], sigma, verbose=False)
             mean_acc[option].append(np.mean([perf[k]['acc']
                                              for k in perf.keys()]))
 
-    print("Fitting SVM on full data and evaluation on OOS set.")
+    print('Fitting SVM on full data and evaluation on OOS set.')
     model = {}
     perf_final = {}
     sigma_chosen = {}
     for option in DISTANCES:
-        sigma_chosen[option] = sigmas[np.argmax(mean_acc[option])] - 1
+        sigma_chosen[option] = sigmas[np.argmax(mean_acc[option])]
         distance2 = np.exp(- np.square(distance[option])
                            / (sigma_chosen[option]**2))
         x = np.array(distance2[:stop, :])[:, :stop]
@@ -150,7 +155,6 @@ def main():
         clf.fit(x, labels[:stop])
         model[option] = clf
         y_test = clf.predict(x_test)
-        print(y_test)
         perf_final[option] = {'acc': accuracy_score(labels[stop:], y_test),
                               'prec': precision_score(labels[stop:], y_test),
                               'f1': f1_score(labels[stop:], y_test),
@@ -162,15 +166,15 @@ def main():
 if __name__ == '__main__':
 
     distance, _, perf_final, sigma_chosen, mean_acc, labels = main()
-    print("Final performance of the model on OOS test data:")
+    print('Final performance of the model on OOS test data:')
     print(pd.DataFrame.from_dict(perf_final))
 
     # Plot CV accuracy
     fig, ax = plt.subplots(figsize=(6, 4))
     for option in DISTANCES:
-        plt.plot(SIGMAS, mean_acc['log_euclidean'][1:],
-                 label=option + " \nDistance")
-    plt.legend(loc="center left", bbox_to_anchor=(1.0, 0.5), fontsize=18)
+        plt.plot(SIGMAS, mean_acc[option],
+                 label=option + ' \nDistance')
+    plt.legend(loc='center left', bbox_to_anchor=(1.0, 0.5), fontsize=18)
     plt.xlabel(r'$\sigma$', fontsize=24)
     plt.ylabel(r'CV accuracy', fontsize=20)
 
