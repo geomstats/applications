@@ -15,7 +15,7 @@ CORR_THRESH = 0.1
 GAMMA = 1.0
 NB_GRAPHS = 86
 SIGMAS = list(np.arange(0.5, 20, 0.5))
-
+DISTANCE = ["log_euclidean", "frobenius", "riemannian"]
 
 def import_data():
     graphs = pd.DataFrame.from_csv("data/train_fnc.csv")
@@ -27,24 +27,30 @@ def import_data():
     mapping = pd.DataFrame.from_csv("add_info/" +
                                     "rs_fmri_fnc_mapping.csv")
     graph_labels = pd.DataFrame.from_csv("data/train_labels.csv")
-    all_graphs = [None] * n_graphs
-    all_targets = [None] * n_graphs
-    for i in range(NB_GRAPHS):
+    all_graphs = [None] * NB_GRAPHS
+    all_targets = [None] * NB_GRAPHS
+    
+    def create_connectome(graph_id, mapping):
         u = np.zeros((DIM_SPACE, DIM_SPACE))
-        for ii in range(mapping.shape[0]):
-            a, b = (mapping.iloc[ii]["mapA"], mapping.iloc[ii]["mapB"])
-            u[map_FCN_r[a], map_FCN_r[b]] = graphs.iloc[i][ii]
+        nb_edges = mapping.shape[0]
+        for edge in range(nb_edges):
+            e0, e1 = (mapping.iloc[edge]["mapA"], mapping.iloc[edge]["mapB"])
+            u[map_FCN_r[e0], map_FCN_r[e1]] = graphs.iloc[graph_id][edge]
             u = np.multiply(u, (u > CORR_THRESH))
-        all_graphs[i] = np.abs(u + u.T)
-        all_targets[i] = graph_labels.loc[graphs.index[i], "Class"]
+        return np.abs(u + u.T)
+                       
+        
+    for graph_id in range(NB_GRAPHS):
+        all_graphs[graph_id] = create_connectome(graph_id, mapping)
+        all_targets[graph_id] = graph_labels.loc[graphs.index[graph_id], "Class"]
 
     np.random.seed(RAND_SEED)
     index_train = range(NB_GRAPHS)
     np.random.shuffle(index_train)
     stop = int(0.85 * NB_GRAPHS)
     labels = np.array(all_targets[index_train])
-    return graphs.iloc[:, index_train], [all_graphs[t] for t in index_train],\
-        labels, stop, index_train
+    return (graphs.iloc[:, index_train], [all_graphs[t] for t in index_train],
+        labels, stop, index_train)
 
 
 def laplacian(a):
@@ -87,27 +93,27 @@ def main():
     gamma = GAMMA
     time_alg = {}
     graphs, all_graphs, labels, stop, index_train = import_data()
-    distance = {option: np.zeros((len(all_graphs), len(all_graphs)))
-                for option in ["LED", "ED", "RD"]}
+    distance = {option: np.zeros((NB_GRAPHS, NB_GRAPHS))
+                for option in DISTANCE}
     tic = time.time()
-    for option in ["LED", "ED", "RD"]:
+    for option in DISTANCE:
         tic = time.time()
-        for i in range(1, NB_GRAPHS):
-            hat_l1 = laplacian(all_graphs[i]) + gamma*np.eye(DIM_SPACE)
-            Lambd, U = np.linalg.eigh(hat_l1)
-            invL1 = U.dot(np.diag(1.0/np.sqrt(Lambd)).dot(U.T))
-            for j in range(i):
+        for c, g in enumerate(all_graphs):
+            hat_l1 = laplacian(g) + gamma*np.eye(DIM_SPACE)
+            lambda2, u = np.linalg.eigh(hat_l1)
+            inv_l1 = u.dot(np.diag(1.0/np.sqrt(lambda2)).dot(u.T))
+            for j in range(c):
                 hat_l2 = laplacian(all_graphs[j]) + gamma*np.eye(DIM_SPACE)
-                if option == "LED":
-                    distance[option][i, j] = np.linalg.norm(spd_space.group_log(hat_l1).squeeze(0)
+                if option == "log_euclidean":
+                    distance[option][c, j] = np.linalg.norm(spd_space.group_log(hat_l1).squeeze(0)
                                                             - spd_space.group_log(hat_l2).squeeze(0),
                                                             'fro')
-                elif option == "ED":
-                    distance[option][i, j] = np.linalg.norm(hat_l1
+                elif option == "frobenius":
+                    distance[option][c, j] = np.linalg.norm(hat_l1
                                                             - hat_l2, 'fro')
                 else:
-                    distance[option][i, j] = np.linalg.norm(
-                                                            invL1.dot(spd_space.group_log(hat_l2).squeeze(0).dot(invL1)),
+                    distance[option][c, j] = np.linalg.norm(
+                                                            inv_l1.dot(spd_space.group_log(hat_l2).squeeze(0).dot(inv_l1)),
                                                             'fro')
         distance[option] = distance[option] + distance[option].T
         toc = time.time()
@@ -117,7 +123,7 @@ def main():
     print("Starting SVM fitting with Cross Validation")
     sigmas = SIGMAS
     mean_acc = {}
-    for option in ["LED", "ED", "RD"]:
+    for option in DISTANCE:
         print("Option: ", option)
         mean_acc[option] = []
         perf, conf = fit_kernel_cv(distance[option][:stop, :stop],
@@ -133,7 +139,7 @@ def main():
     model = {}
     perf_final = {}
     sigma_chosen = {}
-    for option in ['LED', 'ED', 'RD']:
+    for option in DISTANCE:
         sigma_chosen[option] = sigmas[np.argmax(mean_acc[option])] - 1
         distance2 = np.exp(- np.square(distance[option])
                            / (sigma_chosen[option]**2))
@@ -160,12 +166,9 @@ if __name__ == "__main__":
 
     # Plot CV accuracy
     fig, ax = plt.subplots(figsize=(6, 4))
-    plt.plot(SIGMAS, mean_acc['LED'][1:],
-             label="Log-Euclidean \nDistance", c="blue")
-    plt.plot(SIGMAS, mean_acc['ED'][1:],
-             label="Euclidean \nDistance", c="black")
-    plt.plot(SIGMAS, mean_acc['RD'][1:],
-             label="Riemannian \nDistance", c="red")
+    for option in DISTANCE:
+        plt.plot(SIGMAS, mean_acc['log_euclidean'][1:],
+                 label=option + " \nDistance")
     plt.legend(loc="center left", bbox_to_anchor=(1.0, 0.5), fontsize=18)
     plt.xlabel(r'$\sigma$', fontsize=24)
     plt.ylabel(r'CV accuracy', fontsize=20)
@@ -173,7 +176,7 @@ if __name__ == "__main__":
     # Plot Clustermap representation
     import seaborn as sb
     import scipy.cluster.hierarchy as hc
-    for option in ['LED', 'ED', 'RD']:
+    for option in DISTANCE:
         plt.figure()
         distance2 = np.exp(-np.square(distance[option])
                            / (sigma_chosen[option]**2))
