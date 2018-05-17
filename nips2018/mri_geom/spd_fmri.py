@@ -135,7 +135,7 @@ def compute_similarities(all_graphs, type_dist):
     return distance + distance.T
 
 
-def process_graphs():
+def classify_graphs():
     time_alg = {}
     graphs, all_graphs, labels, stop, index_train = import_data()
     distance = {type_dist: np.zeros((NB_GRAPHS, NB_GRAPHS))
@@ -184,7 +184,7 @@ def process_graphs():
 
 if __name__ == '__main__':
 
-    distance_dict, _, perf_final, sigma_chosen, mean_acc, labels = process_graphs()
+    distance_dict, _, perf_final, sigma_chosen, mean_acc, labels = classify_graphs()
     print('Final performance of the model on OOS test data:')
     print(pd.DataFrame.from_dict(perf_final))
 
