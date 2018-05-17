@@ -39,7 +39,7 @@ def import_data():
                                     'rs_fmri_fnc_mapping.csv')
     graph_labels = pd.DataFrame.from_csv('data/train_labels.csv')
     all_graphs = [None] * NB_GRAPHS
-    all_targets = [None] * NB_GRAPHS
+    all_targets = np.zeros(NB_GRAPHS)
 
     def create_connectome(graph_id, mapping):
         u = np.zeros((DIM_SPACE, DIM_SPACE))
@@ -53,13 +53,15 @@ def import_data():
 
     for graph_id in range(NB_GRAPHS):
         all_graphs[graph_id] = create_connectome(graph_id, mapping)
-        all_targets[graph_id] = graph_labels.loc[graphs.index[graph_id], 'Class']
+        all_targets[graph_id] = int(graph_labels.loc[graphs.index[graph_id], 'Class'])
+
+    all_targets = np.array(all_targets)
 
     np.random.seed(RAND_SEED)
     index_train = range(NB_GRAPHS)
     np.random.shuffle(index_train)
     stop = int(TRAIN_SIZE * NB_GRAPHS)
-    labels = np.array(all_targets[index_train])
+    labels = all_targets[index_train]
     return (graphs.iloc[:, index_train], [all_graphs[t] for t in index_train],
             labels, stop, index_train)
 
@@ -91,16 +93,17 @@ def fit_kernel_cv(log_euclidean_distance, labels,
     kf = KFold(n_splits=10)
     perf = {}
     conf = {}
-    k = 0
+    nb_train = len(labels)
     if sigma is not None:
         distance = np.exp(- np.square(log_euclidean_distance)/(sigma**2))
     else:
         distance = log_euclidean_distance
 
-    for train_index, test_index in kf.split(range(NB_GRAPHS)):
+    k = 0
+    for train_index, test_index in kf.split(range(nb_train)):
         train_index = np.array(train_index)
         test_index = np.array(test_index)
-        x = np.array(distance[train_index, :])[:, train_index]
+        x = np.array(distance)[train_index, :][:, train_index]
         x_test = np.array(distance[test_index, :])[:, train_index]
         clf = SVC(kernel='precomputed')
         clf.fit(x, labels[train_index])
@@ -150,13 +153,14 @@ def classify_graphs():
     print('Done computing distances')
 
     print('Starting SVM fitting with Cross Validation')
-    sigmas = SIGMAS
     mean_acc = {}
     for type_dist in DISTANCES:
         print('type_dist: ', type_dist)
-        for sigma in sigmas:
-            perf, conf = fit_kernel_cv(distance[type_dist][:stop, :stop],
-                                       labels[:stop], sigma, verbose=False)
+        mean_acc[type_dist] = []
+        for sigma in SIGMAS:
+            print(labels, type(labels))
+            perf, conf = fit_kernel_cv(distance[type_dist][:stop, :stop], labels[:stop],
+                                       sigma, verbose=False)
             mean_acc[type_dist].append(np.mean([perf[k]['acc']
                                                 for k in perf.keys()]))
 
@@ -165,7 +169,7 @@ def classify_graphs():
     perf_final = {}
     sigma_chosen = {}
     for type_dist in DISTANCES:
-        sigma_chosen[type_dist] = sigmas[np.argmax(mean_acc[type_dist])]
+        sigma_chosen[type_dist] = SIGMAS[np.argmax(mean_acc[type_dist])]
         distance2 = np.exp(- np.square(distance[type_dist])
                            / (sigma_chosen[type_dist]**2))
         x = np.array(distance2[:stop, :])[:, :stop]
