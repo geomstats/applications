@@ -135,7 +135,7 @@ def compute_similarities(all_graphs, type_dist):
     return distance + distance.T
 
 
-def process_fMRI():
+def process_graphs():
     time_alg = {}
     graphs, all_graphs, labels, stop, index_train = import_data()
     distance = {type_dist: np.zeros((NB_GRAPHS, NB_GRAPHS))
@@ -184,7 +184,7 @@ def process_fMRI():
 
 if __name__ == '__main__':
 
-    distance_dict, _, perf_final, sigma_chosen, mean_acc, labels = process_fMRI()
+    distance_dict, _, perf_final, sigma_chosen, mean_acc, labels = process_graphs()
     print('Final performance of the model on OOS test data:')
     print(pd.DataFrame.from_dict(perf_final))
 
