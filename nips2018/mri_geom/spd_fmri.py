@@ -8,10 +8,13 @@ import geomstats.spd_matrices_space as spd_space
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import scipy.cluster.hierarchy as hc
+import seaborn as sb
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.model_selection import KFold
 from sklearn.svm import SVC
+
 import time
 
 DIM_SPACE = 28
@@ -115,7 +118,7 @@ def fit_kernel_cv(log_euclidean_distance, labels,
         return perf, conf
 
 
-def compute_similarities(all_graphs, option):
+def compute_similarities(all_graphs, type_dist):
     distance = np.zeros((NB_GRAPHS, NB_GRAPHS))
     for c, g in enumerate(all_graphs):
             hat_l1 = laplacian(g) + GAMMA * np.eye(DIM_SPACE)
@@ -123,84 +126,82 @@ def compute_similarities(all_graphs, option):
             inv_l1 = u.dot(np.diag(1.0/np.sqrt(lambda2)).dot(u.T))
             for j in range(c):
                 hat_l2 = laplacian(all_graphs[j]) + GAMMA * np.eye(DIM_SPACE)
-                if option == 'log_euclidean':
+                if type_dist == 'log_euclidean':
                     distance[c, j] = log_euclidean(hat_l1, hat_l2)
-                elif option == 'frobenius':
+                elif type_dist == 'frobenius':
                     distance[c, j] = frobenius(hat_l1, hat_l2)
                 else:
                     distance[c, j] = riemannian(inv_l1, hat_l2)
     return distance + distance.T
 
 
-def main():
+def process_fMRI():
     time_alg = {}
     graphs, all_graphs, labels, stop, index_train = import_data()
-    distance = {option: np.zeros((NB_GRAPHS, NB_GRAPHS))
-                for option in DISTANCES}
+    distance = {type_dist: np.zeros((NB_GRAPHS, NB_GRAPHS))
+                for type_dist in DISTANCES}
 
     tic = time.time()
-    for option in DISTANCES:
+    for type_dist in DISTANCES:
         tic = time.time()
-        distance[option] = compute_similarities(all_graphs, option)
+        distance[type_dist] = compute_similarities(all_graphs, type_dist)
         toc = time.time()
-        time_alg[option] = toc-tic
+        time_alg[type_dist] = toc-tic
     print('Done computing distances')
 
     print('Starting SVM fitting with Cross Validation')
     sigmas = SIGMAS
     mean_acc = {}
-    for option in DISTANCES:
-        print('Option: ', option)
+    for type_dist in DISTANCES:
+        print('type_dist: ', type_dist)
         for sigma in sigmas:
-            perf, conf = fit_kernel_cv(distance[option][:stop, :stop],
+            perf, conf = fit_kernel_cv(distance[type_dist][:stop, :stop],
                                        labels[:stop], sigma, verbose=False)
-            mean_acc[option].append(np.mean([perf[k]['acc']
-                                             for k in perf.keys()]))
+            mean_acc[type_dist].append(np.mean([perf[k]['acc']
+                                                for k in perf.keys()]))
 
     print('Fitting SVM on full data and evaluation on OOS set.')
     model = {}
     perf_final = {}
     sigma_chosen = {}
-    for option in DISTANCES:
-        sigma_chosen[option] = sigmas[np.argmax(mean_acc[option])]
-        distance2 = np.exp(- np.square(distance[option])
-                           / (sigma_chosen[option]**2))
+    for type_dist in DISTANCES:
+        sigma_chosen[type_dist] = sigmas[np.argmax(mean_acc[type_dist])]
+        distance2 = np.exp(- np.square(distance[type_dist])
+                           / (sigma_chosen[type_dist]**2))
         x = np.array(distance2[:stop, :])[:, :stop]
         x_test = np.array(distance2[stop:, :])[:, :stop]
         clf = SVC(kernel='precomputed')
         clf.fit(x, labels[:stop])
-        model[option] = clf
+        model[type_dist] = clf
         y_test = clf.predict(x_test)
-        perf_final[option] = {'acc': accuracy_score(labels[stop:], y_test),
-                              'prec': precision_score(labels[stop:], y_test),
-                              'f1': f1_score(labels[stop:], y_test),
-                              'recall': recall_score(labels[stop:], y_test)}
+        perf_final[type_dist] = {'acc': accuracy_score(labels[stop:], y_test),
+                                 'prec': precision_score(labels[stop:], y_test),
+                                 'f1': f1_score(labels[stop:], y_test),
+                                 'recall': recall_score(labels[stop:], y_test)}
 
     return distance, time_alg, perf_final, sigma_chosen, mean_acc, labels
 
 
 if __name__ == '__main__':
 
-    distance, _, perf_final, sigma_chosen, mean_acc, labels = main()
+    distance_dict, _, perf_final, sigma_chosen, mean_acc, labels = process_fMRI()
     print('Final performance of the model on OOS test data:')
     print(pd.DataFrame.from_dict(perf_final))
 
     # Plot CV accuracy
     fig, ax = plt.subplots(figsize=(6, 4))
-    for option in DISTANCES:
-        plt.plot(SIGMAS, mean_acc[option],
-                 label=option + ' \nDistance')
+    for type_dist in DISTANCES:
+        plt.plot(SIGMAS, mean_acc[type_dist],
+                 label=type_dist + ' \nDistance')
     plt.legend(loc='center left', bbox_to_anchor=(1.0, 0.5), fontsize=18)
     plt.xlabel(r'$\sigma$', fontsize=24)
     plt.ylabel(r'CV accuracy', fontsize=20)
 
     # Plot Clustermap representation
-    import seaborn as sb
-    import scipy.cluster.hierarchy as hc
-    for option in DISTANCES:
+    for type_dist in DISTANCES:
         plt.figure()
-        distance2 = np.exp(-np.square(distance[option])
-                           / (sigma_chosen[option]**2))
-        linkage = hc.linkage(distance2, method='average')
-        sb.clustermap(distance2, row_linkage=linkage, col_linkage=linkage,
+        kernel_dist = np.exp(-np.square(distance_dict[type_dist])
+                             / (sigma_chosen[type_dist]**2))
+        linkage = hc.linkage(kernel_dist, method='average')
+        sb.clustermap(kernel_dist, row_linkage=linkage, col_linkage=linkage,
                       cmap='coolwarm', xticklabels=labels, yticklabels=labels)
