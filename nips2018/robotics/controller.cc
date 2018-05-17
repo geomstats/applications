@@ -1,8 +1,8 @@
 // This example application runs a controller for the IIWA
 
 #include "Sai2Model.h"
-#include "utils/RedisClient.h"
-#include "utils/LoopTimer.h"
+#include "utils/redis_client.h"
+#include "utils/loop_timer.h"
 
 #include <signal.h>
 

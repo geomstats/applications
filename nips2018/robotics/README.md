@@ -8,21 +8,24 @@ The example runs a simulation and controller of a KUKA IIWA14 robot. The control
 The controller reads the desired position and orientation from a redis server, populated by geomstat examples
 
 ## Dependencies
-This application depends on :
+This application depends on:
+
 * [geomstats](https://github.com/ninamiolane/geomstats) package for python
-* [Gazebo](http://gazebosim.org/) version 7 to 9
+* [Gazebo](http://gazebosim.org/) versions 7 to 9
 * [sai2-model](https://github.com/manips-sai-org/sai2-model/tree/geomstats_robotics_examples) (use tag geomstats_robotics_examples)
 * [sai2-urdfreader](https://github.com/manips-sai-org/sai2-urdfreader/tree/geomstats_robotics_examples) (use tag geomstats_robotics_examples)
-* Redis*: Redis server [brew, apt-get]
-* Hiredis*: Redis minimalist client [brew, apt-get]
-* Eigen3*: Linear algebra [brew, apt-get]
-* Redis for python3 : pip3 install redis
-## Build instructions 
+* redis: Redis server [brew, apt-get]
+* hiredis: Redis minimalist client [brew, apt-get]
+* eigen3: Linear algebra [brew, apt-get]
+* redis for python3 : pip3 install redis
+
+## Build instructions
 ```
 mkdir build
 cd build
 cmake .. && make -j2
 ```
+
 ## run
 * First, make sure the redis server is running. To run it type in a terminal
 ```
@@ -30,7 +33,7 @@ redis-server
 ```
 * Second, run the simulation and the controller using the provided script
 ```
-sh run_simulation
+./run_simulation.sh
 ```
 * Third, run the python script robot_so3.py
 ```

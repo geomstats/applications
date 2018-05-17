@@ -35,7 +35,7 @@ add_definitions(${SAI2-MODEL_DEFINITIONS})
 find_library(HIREDIS_LIBRARY hiredis)
 
 # - jsoncpp
-if (CMAKE_SYSTEM_NAME MATCHES Darwin) 
+if (CMAKE_SYSTEM_NAME MATCHES Darwin)
 	find_library(JSONCPP_LIBRARY jsoncpp)
 elseif (CMAKE_SYSTEM_NAME MATCHES Linux)
 	find_package(PkgConfig REQUIRED)
@@ -45,14 +45,13 @@ elseif (CMAKE_SYSTEM_NAME MATCHES Linux)
 	set(JSONCPP_LIBRARY ${JSONCPP_LIBRARIES})
 endif ()
 
-
 add_library(iiwa_control SHARED iiwa_control.cc)
-target_link_libraries(iiwa_control 
+target_link_libraries(iiwa_control
 	${GAZEBO_LIBRARIES}
 	${HIREDIS_LIBRARY}
 	)
 
-add_executable(controller controller.cpp utils/LoopTimer.cpp)
+add_executable(controller controller.cc utils/loop_timer.cc)
 target_link_libraries(controller
 	${SAI2-MODEL_LIBRARIES}
 	${SAI2-URDF_LIBRARIES}

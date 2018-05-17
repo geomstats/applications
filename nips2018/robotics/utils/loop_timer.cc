@@ -1,4 +1,4 @@
-#include "LoopTimer.h"
+#include "loop_timer.h"
 
 #ifndef USE_CHRONO
 // Helper timespec functions
