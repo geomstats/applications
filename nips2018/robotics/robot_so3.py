@@ -24,7 +24,7 @@ TRAJECTORY_TIME = 5.0
 LOOP_FREQUENCY = 100.0
 
 
-def decode_matrix_redis(redis_key):
+def deserialize_matrix_redis(redis_key):
     """
     reads a the value corresponding to 'redis_key'
     from the redis server and returns it as a 2D array
@@ -50,7 +50,7 @@ def serialize_matrix_to_redis(redis_key, mat, float_fmt='%08f'):
 
 def main():
 
-    initial_orientation = decode_matrix_redis(DESIRED_ORIENTATION_KEY)
+    initial_orientation = deserialize_matrix_redis(DESIRED_ORIENTATION_KEY)
     initial_point = SO3_GROUP.rotation_vector_from_matrix(initial_orientation)
 
     final_orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])

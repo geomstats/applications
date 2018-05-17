@@ -3,7 +3,7 @@
 #include <gazebo/common/common.hh>
 #include <ignition/math/Vector3.hh>
 
-#include "utils/RedisClient.h"
+#include "utils/redis_client.h"
 
 const char JOINT_TORQUES_COMMANDED_KEY[] = "geomstats_examles::command_torques";
 const char JOINT_POSITIONS_KEY[] = "geomstats_examles::joint_positions";
