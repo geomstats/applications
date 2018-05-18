@@ -19,7 +19,7 @@ import time
 
 N_NODES = 28
 RAND_SEED = 2018
-SPACE = spd_space.SPDMatricesSpace(dimension=N_NODES)
+SPACE = spd_space.SPDMatricesSpace(n=N_NODES)
 CORR_THRESH = 0.1
 GAMMA = 1.0
 N_GRAPHS = 86
@@ -34,7 +34,7 @@ def import_data():
                                            index_col=None)
     map_functional = map_functional['fMRI_comp_ind'].to_dict()
     map_functional_r = {v: k for k, v
-                        in map_functional.iteritems()}
+                        in map_functional.items()}
     mapping = pd.DataFrame.from_csv('add_info/' +
                                     'rs_fmri_fnc_mapping.csv')
     graph_labels = pd.DataFrame.from_csv('data/train_labels.csv')
@@ -58,7 +58,7 @@ def import_data():
     all_targets = np.array(all_targets)
 
     np.random.seed(RAND_SEED)
-    index_train = range(N_GRAPHS)
+    index_train = list(range(NB_GRAPHS))
     np.random.shuffle(index_train)
     stop = int(TRAIN_SIZE * N_GRAPHS)
     labels = all_targets[index_train]
@@ -155,10 +155,8 @@ def classify_graphs():
     print('Starting SVM fitting with Cross Validation')
     mean_acc = {}
     for type_dist in DISTANCES:
-        print('type_dist: ', type_dist)
         mean_acc[type_dist] = []
         for sigma in SIGMAS:
-            print(labels, type(labels))
             perf, conf = fit_kernel_cv(distance[type_dist][:stop, :stop], labels[:stop],
                                        sigma, verbose=False)
             mean_acc[type_dist].append(np.mean([perf[k]['acc']
