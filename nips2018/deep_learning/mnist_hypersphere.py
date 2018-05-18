@@ -47,7 +47,8 @@ y_test = keras.utils.to_categorical(y_test, num_classes)
 model = Sequential()
 
 kernel_size = (3, 3)
-hypersphere_dimension = kernel_size[0] * kernel_size[1] - 1
+
+hypersphere_dimension = 18
 model.add(Conv2D(32, kernel_size=kernel_size,
                  activation='relu',
                  input_shape=input_shape,
