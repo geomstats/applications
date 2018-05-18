@@ -252,7 +252,7 @@ class TestHyperbolicSpaceMethods(unittest.TestCase):
         # Riemannian Exp then Riemannian Log
         # General case
         base_point = self.space.random_uniform()
-        # TODO(nina): this fails for high euclidean norms of vector_1
+        # TODO(xxx): this fails for high euclidean norms of vector_1
         vector = gs.array([9., 4., 0., 0., -1., -3., 2.])
         vector = self.space.projection_to_tangent_space(
                                                   vector=vector,
@@ -297,7 +297,7 @@ class TestHyperbolicSpaceMethods(unittest.TestCase):
         gs.testing.assert_allclose(result, expected)
 
     def test_exp_and_dist_and_projection_to_tangent_space(self):
-        # TODO(nina): this fails for high norms of vector
+        # TODO(xxx): this fails for high norms of vector
         base_point = self.space.random_uniform()
         vector = gs.array([2., 0., -1., -2., 7., 4., 1.])
         tangent_vec = self.space.projection_to_tangent_space(
@@ -313,7 +313,7 @@ class TestHyperbolicSpaceMethods(unittest.TestCase):
         gs.testing.assert_allclose(result, expected)
 
     def test_geodesic_and_belongs(self):
-        # TODO(nina): this tests fails when geodesic goes "too far"
+        # TODO(xxx): this tests fails when geodesic goes "too far"
         initial_point = self.space.random_uniform()
         vector = gs.array([2., 0., -1., -2., 7., 4., 1.])
         initial_tangent_vec = self.space.projection_to_tangent_space(

@@ -34,7 +34,7 @@ class SpecialEuclideanGroup(LieGroup):
         super(SpecialEuclideanGroup, self).__init__(
                           dimension=self.dimension,
                           identity=gs.zeros(self.dimension))
-        # TODO(nina): keep the names rotations and translations here?
+        # TODO(xxx): keep the names rotations and translations here?
         self.rotations = SpecialOrthogonalGroup(n=n)
         self.translations = EuclideanSpace(dimension=n)
         self.point_representation = 'vector' if n == 3 else 'matrix'
@@ -409,7 +409,7 @@ class SpecialEuclideanGroup(LieGroup):
         """
         random_rot_vec = self.rotations.random_uniform(n_samples)
         random_translation = self.translations.random_uniform(n_samples)
-        # TODO(nina): remove this line after full parallelization
+        # TODO(xxx): remove this line after full parallelization
         random_translation = gs.to_ndarray(random_translation, to_ndim=2)
 
         random_transfo = gs.concatenate([random_rot_vec, random_translation],
@@ -448,7 +448,7 @@ class SpecialEuclideanGroup(LieGroup):
         coef_2[mask_close_to_0] = (1. / 6.
                                    - angle[mask_close_to_0] ** 3 / 120.)
 
-        # TODO(nina): check if the discountinuity as 0 is expected.
+        # TODO(xxx): check if the discountinuity as 0 is expected.
         coef_1[mask_0] = 0
         coef_2[mask_0] = 0
 
@@ -508,7 +508,7 @@ class SpecialEuclideanGroup(LieGroup):
 
         inv_rot_mats = rotations.matrix_from_rotation_vector(
                 -rotation_vectors)
-        # TODO(nina): this is the same mat multiplied several times
+        # TODO(xxx): this is the same mat multiplied several times
         matrix_aux = gs.matmul(mean_rotation_mat, inv_rot_mats)
         assert matrix_aux.shape == (n_points,) + (dim_rotations,) * 2
 

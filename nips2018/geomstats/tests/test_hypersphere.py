@@ -238,7 +238,7 @@ class TestHypersphereMethods(unittest.TestCase):
         regularized_norm_expected = gs.mod(norm_expected, 2 * gs.pi)
         expected = expected / norm_expected * regularized_norm_expected
         expected = helper.to_vector(expected)
-        # TODO(nina): this test fails
+        # TODO(xxx): this test fails
         # self.assertTrue(
         #    gs.allclose(result, expected),
         #    'result = {}, expected = {}'.format(result, expected))

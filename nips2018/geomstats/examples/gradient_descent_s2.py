@@ -92,8 +92,8 @@ def main(output_file='out.mp4', max_iter=128):
     previous_x = initial_point
     geodesics = []
     n_steps = 20
-    # TODO(johmathe): auto differentiation
-    # TODO(johmathe): gpu implementation
+    # TODO(xxx): auto differentiation
+    # TODO(xxx): gpu implementation
     for x, fx in gradient_descent(initial_point,
                                   loss,
                                   grad,
