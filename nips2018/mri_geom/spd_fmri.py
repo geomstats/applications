@@ -200,6 +200,7 @@ if __name__ == '__main__':
     plt.legend(loc='center left', bbox_to_anchor=(1.0, 0.5), fontsize=18)
     plt.xlabel(r'$\sigma$', fontsize=24)
     plt.ylabel(r'CV accuracy', fontsize=20)
+    plt.show()
 
     # Plot Clustermap representation
     for type_dist in DISTANCES:
@@ -209,3 +210,5 @@ if __name__ == '__main__':
         linkage = hc.linkage(kernel_dist, method='average')
         sb.clustermap(kernel_dist, row_linkage=linkage, col_linkage=linkage,
                       cmap='coolwarm', xticklabels=labels, yticklabels=labels)
+        plt.title('Clustermap for the ' + type_distance + ' distance')
+        plt.show(_
