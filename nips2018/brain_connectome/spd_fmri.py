@@ -29,15 +29,15 @@ TRAIN_SIZE = 0.85
 
 
 def import_data():
-    graphs = pd.DataFrame.from_csv('data/train_fnc.csv')
-    map_functional = pd.DataFrame.from_csv('add_info/comp_ind_fmri.csv',
+    graphs = pd.DataFrame.read_csv('data/train_fnc.csv')
+    map_functional = pd.DataFrame.read_csv('add_info/comp_ind_fmri.csv',
                                            index_col=None)
     map_functional = map_functional['fMRI_comp_ind'].to_dict()
     map_functional_r = {v: k for k, v
                         in map_functional.items()}
-    mapping = pd.DataFrame.from_csv('add_info/' +
+    mapping = pd.DataFrame.read_csv('add_info/' +
                                     'rs_fmri_fnc_mapping.csv')
-    graph_labels = pd.DataFrame.from_csv('data/train_labels.csv')
+    graph_labels = pd.DataFrame.read_csv('data/train_labels.csv')
     all_graphs = [None] * N_GRAPHS
     all_targets = np.zeros(N_GRAPHS)
 
