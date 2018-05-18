@@ -42,7 +42,7 @@ def import_data():
     all_targets = np.zeros(N_GRAPHS)
 
     def create_connectome(graph_id, mapping):
-        u = np.zeros((DIM_SPACE, DIM_SPACE))
+        u = np.zeros((N_NODES, N_NODES))
         nb_edges = mapping.shape[0]
         for edge in range(nb_edges):
             e0, e1 = (mapping.iloc[edge]['mapA'], mapping.iloc[edge]['mapB'])
@@ -58,7 +58,7 @@ def import_data():
     all_targets = np.array(all_targets)
 
     np.random.seed(RAND_SEED)
-    index_train = list(range(NB_GRAPHS))
+    index_train = list(range(N_NODES))
     np.random.shuffle(index_train)
     stop = int(TRAIN_SIZE * N_GRAPHS)
     labels = all_targets[index_train]
@@ -124,11 +124,11 @@ def fit_kernel_cv(log_euclidean_distance, labels,
 def compute_similarities(all_graphs, type_dist):
     distance = np.zeros((N_GRAPHS, N_GRAPHS))
     for c, g in enumerate(all_graphs):
-            hat_l1 = laplacian(g) + GAMMA * np.eye(DIM_SPACE)
+            hat_l1 = laplacian(g) + GAMMA * np.eye(N_NODES)
             lambda2, u = np.linalg.eigh(hat_l1)
             inv_l1 = u.dot(np.diag(1.0/np.sqrt(lambda2)).dot(u.T))
             for j in range(c):
-                hat_l2 = laplacian(all_graphs[j]) + GAMMA * np.eye(DIM_SPACE)
+                hat_l2 = laplacian(all_graphs[j]) + GAMMA * np.eye(N_NODES)
                 if type_dist == 'log_euclidean':
                     distance[c, j] = log_euclidean(hat_l1, hat_l2)
                 elif type_dist == 'frobenius':

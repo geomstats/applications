@@ -22,6 +22,12 @@ nose2
 
 ### Examples
 
+#### Poincarre Disc Visualisations
+```
+# from the root of your unziped directory
+python3 geomstats/examples/plot_square_h2.py
+```
+
 #### Gradient Descent on Hypersphere
 
 The easiest example to launch from the paper is the optimization on the hypersphere:
@@ -37,8 +43,9 @@ The next example to try out is the brain connectome one:
 
 ```
 # from the root of your unziped directory
-pip3 install -r brain_connectome/requirements.txt
-python3 brain_connectome/spd_mri.py
+cd brain_connectome
+pip3 install -r requirements.txt
+python3 spd_fmri.py
 ```
 
 #### Robotics Example
