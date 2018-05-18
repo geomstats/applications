@@ -245,7 +245,7 @@ class RiemannianMetric(object):
 
         Initialization with one of the points.
         """
-        # TODO(nina): profile this code to study performance,
+        # TODO(xxx): profile this code to study performance,
         # i.e. what to do with sq_dists_between_iterates.
 
         n_points = len(points)
@@ -269,7 +269,7 @@ class RiemannianMetric(object):
             tangent_mean = gs.zeros_like(a_tangent_vector)
 
             for i in range(n_points):
-                # TODO(nina): abandon the for loop
+                # TODO(xxx): abandon the for loop
                 point_i = points[i]
                 weight_i = weights[i]
                 tangent_mean = tangent_mean + weight_i * self.log(
@@ -307,7 +307,7 @@ class RiemannianMetric(object):
         This is standard PCA on the Riemannian Logarithms of the points
         at the base point.
         """
-        # TODO(nina): It only works for points of ndim=2, adapt to other ndims.
+        # TODO(xxx): It only works for points of ndim=2, adapt to other ndims.
         if base_point is None:
             base_point = self.mean(points)
 

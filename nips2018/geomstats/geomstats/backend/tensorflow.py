@@ -1,6 +1,6 @@
 """Tensorflow based computation backend."""
 
-# TODO(johmathe): Reproduce all unit tests with tensorflow backend.
+# TODO(xxx): Reproduce all unit tests with tensorflow backend.
 
 import tensorflow as tf
 

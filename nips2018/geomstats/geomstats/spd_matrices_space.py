@@ -44,7 +44,7 @@ def sqrtm(sym_mat):
     return sqrt_mat
 
 
-# TODO(nina): The manifold of sym matrices is not a Lie group.
+# TODO(xxx): The manifold of sym matrices is not a Lie group.
 # Use 'group_exp' and 'group_log'?
 def group_exp(sym_mat):
     """

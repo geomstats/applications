@@ -160,7 +160,7 @@ class HypersphereMetric(RiemannianMetric):
         tangent_vec = gs.to_ndarray(tangent_vec, to_ndim=2)
         base_point = gs.to_ndarray(base_point, to_ndim=2)
 
-        # TODO(johmathe): Evaluate the bias introduced by this variable
+        # TODO(xxx): Evaluate the bias introduced by this variable
         norm_tangent_vec = self.embedding_metric.norm(tangent_vec) + EPSILON
         coef_1 = gs.cos(norm_tangent_vec)
         coef_2 = gs.sin(norm_tangent_vec) / norm_tangent_vec
@@ -223,7 +223,7 @@ class HypersphereMetric(RiemannianMetric):
         Compute the Riemannian distance between points
         point_a and point_b.
         """
-        # TODO(nina): case gs.dot(unit_vec, unit_vec) != 1
+        # TODO(xxx): case gs.dot(unit_vec, unit_vec) != 1
         # if gs.all(gs.equal(point_a, point_b)):
         #    return 0.
 
