@@ -35,12 +35,12 @@ def deserialize_matrix_redis(redis_key):
     return matrix.astype(np.float)
 
 
-def serialize_matrix_to_redis(redis_key, mat, float_fmt='%08f'):
+def serialize_matrix_to_redis(redis_key, mat, float_fmt='%f'):
     """
     writes a np 2D array 'mat' to the redis server
     using the key 'redis_key'
     """
-    line_separator = ';'
+    line_separator = '; '
     col_separator = ' '
     each_float_as_str = np.char.mod(float_fmt, mat)
     each_line_as_str = [col_separator.join(f) for f in each_float_as_str]

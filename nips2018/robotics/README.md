@@ -10,6 +10,7 @@ The controller reads the desired position and orientation from a redis server, p
 ## Dependencies
 This application depends on:
 
+* c++ compiler, cmake [brew, apt-get]
 * geomstats: pip3 install geomstats
 * [Gazebo](http://gazebosim.org/) versions 7 to 9
 * sai2-model: Install from dependencies/sai2-model
