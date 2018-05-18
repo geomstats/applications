@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<!--simple pbot-->
+
+<robot name="RPBot">
+    <link name="base_link">
+    </link>
+
+    <link name="link0">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+            <mass value="1" />
+            <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
+        </inertial>
+    </link>
+
+    <link name="link1">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+            <mass value="1" />
+            <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
+        </inertial>
+    </link>
+
+    <joint name="j0" type="revolute">
+        <parent link="base_link" />
+        <child link="link0" />
+        <origin xyz="0.000000 0.000000 0.000000" rpy="-0.000000 0.000000 -0.000000" />
+        <axis xyz="1 0 0" />
+        <limit lower="-2.967" upper="2.967" effort="176" velocity="1.7104" />
+    </joint>
+
+    <joint name="j1" type="prismatic">
+        <parent link="link0" />
+        <child link="link1" />
+        <origin xyz="0.000000 0.000000 1.000000" rpy="-0.000000 0.000000 -0.000000" />
+        <axis xyz="0 0 1" />
+        <limit lower="-2.967" upper="2.967" effort="176" velocity="1.7104" />
+    </joint>
+    
+</robot>
+
+
+

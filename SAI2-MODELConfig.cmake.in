@@ -1,0 +1,12 @@
+# compute paths
+get_filename_component(SAI2-MODEL_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(SAI2-MODEL_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+set(SAI2-MODEL_DEFINITIONS "@CONF_DEFINITIONS@")
+ 
+# library dependencies (contains definitions for IMPORTED targets)
+if(NOT TARGET sai2-model AND NOT SAI2-MODEL_BINARY_DIR)
+  include("${SAI2-MODEL_CMAKE_DIR}/SAI2-MODELTargets.cmake")
+endif()
+
+# IMPORTED target created by SAI2-MODELTargets.cmake
+set(SAI2-MODEL_LIBRARIES "@CONF_LIBRARIES@")

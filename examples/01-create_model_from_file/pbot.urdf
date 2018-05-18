@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<!--simple pbot-->
+
+<robot name="PBot">
+    <link name="base_link">
+        <collision>
+            <origin xyz="0.0 0.0 -0.5" rpy="0 0 0" />
+            <geometry>
+                <box size="4.0 4.0 1.0" />
+            </geometry>
+        </collision>
+    </link>
+    <link name="link0">
+        <inertial>
+            <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+            <mass value="1" />
+            <inertia ixx="0.1" iyy="0.1" izz="0.1" ixy="0" ixz="0" iyz="0" />
+        </inertial>
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+            <geometry>
+                <sphere radius="0.2" />
+            </geometry>
+        </collision>
+    </link>
+    
+    <joint name="j0" type="prismatic">
+        <parent link="base_link" />
+        <child link="link0" />
+        <origin xyz="0.000000 0.000000 3.000000" rpy="-0.000000 0.000000 -0.000000" />
+        <axis xyz="0 0 1" />
+        <limit lower="-2.967" upper="2.967" effort="176" velocity="1.7104" />
+    </joint>
+    
+</robot>
+
+
+
