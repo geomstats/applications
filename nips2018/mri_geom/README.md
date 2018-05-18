@@ -8,7 +8,7 @@ To run the example from the geomstat directory, enter in the terminal:
 cd examples/nips2018/mri_geom
 python spd_fmri.py
 
-```
+'''
 
 
 Dependencies:
