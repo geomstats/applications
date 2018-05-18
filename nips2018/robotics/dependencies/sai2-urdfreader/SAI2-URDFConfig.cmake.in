@@ -1,0 +1,12 @@
+# compute paths
+get_filename_component(SAI2-URDF_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(SAI2-URDF_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+set(SAI2-URDF_DEFINITIONS "@CONF_DEFINITIONS@")
+ 
+# library dependencies (contains definitions for IMPORTED targets)
+if(NOT TARGET sai2-urdf AND NOT SAI2-URDF_BINARY_DIR)
+  include("${SAI2-URDF_CMAKE_DIR}/SAI2-URDFTargets.cmake")
+endif()
+
+# IMPORTED target created by SAI2-URDFTargets.cmake
+set(SAI2-URDF_LIBRARIES "@CONF_LIBRARIES@")

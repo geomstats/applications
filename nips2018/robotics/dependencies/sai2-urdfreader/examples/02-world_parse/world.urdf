@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+
+<world name="demo_world" gravity="0.0 0.0 -9.81">
+
+	<robot name="PBot1">
+		<!-- model node is required -->
+		<model dir="resources" path="pbot.urdf" name="PBot" />
+		<!-- origin node is optional -->
+		<origin xyz="4.0 0.0 0.0" rpy="0 0 0" />
+		<visual showwireframe="off" showframes="off" />
+	</robot>
+
+	<robot name="PBot2">
+		<model dir="resources" path="pbot.urdf" name="PBot" />
+		<origin xyz="-4.0 0.0 0.0" rpy="0 0 0" />
+		<visual showwireframe="off" showframes="off" />
+	</robot>
+
+	<static_object name="Box">
+		<origin xyz="0.0 0.0 2.0" rpy="0 0 0" />
+		<collision>
+	        <origin xyz="0.0 0.0 -0.5" rpy="0 0 0" />
+	        <geometry>
+	            <box size="0.5 0.5 0.5" />
+	        </geometry>
+	    </collision>
+	</static_object>
+
+	<light name="light1" type="directional">
+		<position xyz="2.0 -2.0 2.0" />
+		<lookat xyz="0.0 0.0 0.0" />
+	</light>
+
+	<light name="light2" type="directional">
+		<position xyz="2.0 2.0 2.0" />
+		<lookat xyz="0.0 0.0 0.0" />
+	</light>
+
+	<camera name="camera_fixed">
+		<position xyz="0.0 2.0 2.0" />
+		<vertical xyz="0.0 0.0 1.0" />
+		<lookat xyz="0.0 0.0 0.0" />
+	</camera>
+
+	<!-- TODO: support stereo specification -->
+
+</world>
