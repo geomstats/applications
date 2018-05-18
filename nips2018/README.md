@@ -21,7 +21,7 @@ nose2
 
 ### Examples
 
-#### Poincarre Disc Visualisations
+#### Poincare Disk Visualisations
 ```
 # from the root of your unziped directory
 python3 geomstats/examples/plot_square_h2.py
