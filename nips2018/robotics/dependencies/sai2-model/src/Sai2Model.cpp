@@ -1,10 +1,10 @@
 /*
  * Sai2Model.cpp
- * 
+ *
  *  Wrapper around RBDL plus functions to facilitate the whole body control framework from Stanford robotics lab
  *
  *  Created on: Dec 14, 2016
- *      Author: Mikael Jorda
+ *      Author: XXX
  */
 
 #include "Sai2Model.h"
@@ -17,8 +17,8 @@
 namespace Sai2Model
 {
 
-Sai2Model::Sai2Model (const std::string path_to_model_file, 
-	                  bool verbose, 
+Sai2Model::Sai2Model (const std::string path_to_model_file,
+	                  bool verbose,
 	                  const Eigen::Vector3d world_gravity,
 	                  const Eigen::Affine3d position_in_world)
 {
@@ -27,7 +27,7 @@ Sai2Model::Sai2Model (const std::string path_to_model_file,
 
 	// parse rbdl model from urdf
 	bool success = RigidBodyDynamics::URDFReadFromFile(path_to_model_file.c_str(), _rbdl_model, _joint_names_map, false, verbose, world_gravity);
-	if (!success) 
+	if (!success)
 	{
 		std::cout << "Error loading model [" + path_to_model_file + "]" << "\n";
 	}
@@ -139,7 +139,7 @@ void Sai2Model::coriolisForce(Eigen::VectorXd& b)
 	b -= g;
 }
 
-void Sai2Model::modifiedNewtonEuler(Eigen::VectorXd& u, 
+void Sai2Model::modifiedNewtonEuler(Eigen::VectorXd& u,
 								const bool consider_gravity,
                                 const Eigen::VectorXd& q,
                                 const Eigen::VectorXd& dq,
@@ -203,9 +203,9 @@ void Sai2Model::modifiedNewtonEuler(Eigen::VectorXd& u,
 		}
 		else if(children.size() == 1)
 		{
-			child = _rbdl_model->mu[i][0];	
+			child = _rbdl_model->mu[i][0];
 			r_ipi = _rbdl_model->X_lambda[child].r;
-		} 
+		}
 		else
 		{
 			throw("tree structures not implemented yet");
@@ -293,7 +293,7 @@ void Sai2Model::modifiedNewtonEuler(Eigen::VectorXd& u,
 
 		f_i = fip + m*ddB[i];
 		tau_i = tauip - f_i.cross(ripi_list[i]+rib_list[i]) + fip.cross(rib_list[i]) + I*dw[i] + wa[i].cross(I*w[i]);
-		
+
 		// std::cout << "fip : " << fip.transpose() << std::endl;
 		// std::cout << "tauip : " << tauip.transpose() << std::endl;
 		// std::cout << "f_i : " << f_i.transpose() << std::endl;
@@ -778,11 +778,11 @@ void Sai2Model::GraspMatrix(Eigen::MatrixXd& G,
 
 	// switch (n)
 	// {
-	// 	case 2: 
+	// 	case 2:
 	// 	{
 	// 		// resize E
 	// 		E = Eigen::MatrixXd::Zero(6,1);
-			
+
 	// 		// compute the point to point vectors
 	// 		Eigen::Vector3d e12 = positions_in_world[1] - positions_in_world[0];
 	// 		e12.normalize();
@@ -811,7 +811,7 @@ void Sai2Model::GraspMatrix(Eigen::MatrixXd& G,
 	// 			else // rotation around Z axis by 180 degrees
 	// 			{
 	// 				R << -1, 0, 0,
-	// 					 0, -1, 0, 
+	// 					 0, -1, 0,
 	// 					 0, 0, 1;
 	// 			}
 	// 		}
@@ -839,7 +839,7 @@ void Sai2Model::GraspMatrix(Eigen::MatrixXd& G,
 	// 				throw std::runtime_error("Case 2-0 not implemented yet\n");
 	// 				break;
 	// 			}
-	// 			case 1: 
+	// 			case 1:
 	// 			{
 	// 				// only 2 internal moments
 	// 				I = Eigen::MatrixXd::Zero(2,3);
@@ -858,7 +858,7 @@ void Sai2Model::GraspMatrix(Eigen::MatrixXd& G,
 	// 				G.block<2,3>(7,6) = I;
 	// 				break;
 	// 			}
-	// 			case 2: 
+	// 			case 2:
 	// 			{
 	// 				I = Eigen::MatrixXd::Zero(5,6);
 
@@ -880,7 +880,7 @@ void Sai2Model::GraspMatrix(Eigen::MatrixXd& G,
 	// 				G.block<5,6>(7,6) = I;
 	// 				break;
 	// 			}
-	// 			default: 
+	// 			default:
 	// 			throw std::runtime_error("Should not arrive here (number of contact points is 2, number of surface contacts incoherent)\n");
 
 	// 		}
@@ -888,11 +888,11 @@ void Sai2Model::GraspMatrix(Eigen::MatrixXd& G,
 
 	// 	}
 
-	// 	case 3: 
+	// 	case 3:
 	// 	{
 	// 		// resize E
 	// 		E = Eigen::MatrixXd::Zero(9,3);
-			
+
 	// 		// compute the point to point vectors
 	// 		Eigen::Vector3d e12 = positions_in_world[1] - positions_in_world[0];
 	// 		Eigen::Vector3d e13 = positions_in_world[2] - positions_in_world[0];
@@ -925,7 +925,7 @@ void Sai2Model::GraspMatrix(Eigen::MatrixXd& G,
 	// 				G.block<3,9>(6,0) = Ebar;
 	// 				break;
 	// 			}
-	// 			case 1: 
+	// 			case 1:
 	// 			{
 	// 				// compute I
 	// 				Eigen::MatrixXd I = Eigen::MatrixXd::Identity(3,3);
@@ -938,7 +938,7 @@ void Sai2Model::GraspMatrix(Eigen::MatrixXd& G,
 	// 				G.block<3,3>(9,9) = I;
 	// 				break;
 	// 			}
-	// 			case 2: 
+	// 			case 2:
 	// 			{
 	// 				// compute I
 	// 				Eigen::MatrixXd I = Eigen::MatrixXd::Identity(6,6);
@@ -951,7 +951,7 @@ void Sai2Model::GraspMatrix(Eigen::MatrixXd& G,
 	// 				G.block<6,6>(9,9) = I;
 	// 				break;
 	// 			}
-	// 			case 3: 
+	// 			case 3:
 	// 			{
 	// 				// compute I
 	// 				Eigen::MatrixXd I = Eigen::MatrixXd::Identity(9,9);
@@ -965,19 +965,19 @@ void Sai2Model::GraspMatrix(Eigen::MatrixXd& G,
 	// 				break;
 	// 			}
 
-	// 			default: 
+	// 			default:
 	// 			throw std::runtime_error("Should not arrive here (number of contact points is 3, number of surface contacts incoherent)\n");
 
 	// 		}
 	// 		break;
 
-	// 	}		
+	// 	}
 
-	// 	case 4: 
+	// 	case 4:
 	// 	{
 	// 		// resize E
 	// 		E = Eigen::MatrixXd::Zero(12,6);
-			
+
 	// 		// compute the point to point vectors
 	// 		Eigen::Vector3d e12 = positions_in_world[1] - positions_in_world[0];
 	// 		Eigen::Vector3d e13 = positions_in_world[2] - positions_in_world[0];
@@ -1021,7 +1021,7 @@ void Sai2Model::GraspMatrix(Eigen::MatrixXd& G,
 	// 				G.block<6,12>(6,0) = Ebar;
 	// 				break;
 	// 			}
-	// 			case 1: 
+	// 			case 1:
 	// 			{
 	// 				// compute I
 	// 				Eigen::MatrixXd I = Eigen::MatrixXd::Identity(3,3);
@@ -1034,7 +1034,7 @@ void Sai2Model::GraspMatrix(Eigen::MatrixXd& G,
 	// 				G.block<3,3>(12,12) = I;
 	// 				break;
 	// 			}
-	// 			case 2: 
+	// 			case 2:
 	// 			{
 	// 				// compute I
 	// 				Eigen::MatrixXd I = Eigen::MatrixXd::Identity(6,6);
@@ -1047,7 +1047,7 @@ void Sai2Model::GraspMatrix(Eigen::MatrixXd& G,
 	// 				G.block<6,6>(12,12) = I;
 	// 				break;
 	// 			}
-	// 			case 3: 
+	// 			case 3:
 	// 			{
 	// 				// compute I
 	// 				Eigen::MatrixXd I = Eigen::MatrixXd::Identity(9,9);
@@ -1060,7 +1060,7 @@ void Sai2Model::GraspMatrix(Eigen::MatrixXd& G,
 	// 				G.block<9,9>(12,12) = I;
 	// 				break;
 	// 			}
-	// 			case 4: 
+	// 			case 4:
 	// 			{
 	// 				// compute I
 	// 				Eigen::MatrixXd I = Eigen::MatrixXd::Identity(12,12);
@@ -1074,7 +1074,7 @@ void Sai2Model::GraspMatrix(Eigen::MatrixXd& G,
 	// 				break;
 	// 			}
 
-	// 			default: 
+	// 			default:
 	// 			throw std::runtime_error("Should not arrive here (number of contact points is 4, number of surface contacts incoherent)\n");
 
 	// 		}

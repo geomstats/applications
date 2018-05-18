@@ -2,7 +2,7 @@
  * Sai2Model.h
  *
  *  Created on: Dec 14, 2016
- *      Author: Mikael Jorda
+ *      Author: XXX
  */
 
 #ifndef SAI2MODEL_H_
@@ -19,8 +19,8 @@ class Sai2Model
 {
 public:
     // Sai2Model ();
-    Sai2Model (const std::string path_to_model_file, 
-               bool verbose=true, 
+    Sai2Model (const std::string path_to_model_file,
+               bool verbose=true,
                const Eigen::Vector3d world_gravity=Eigen::Vector3d(0.0,0.0,-9.81),
                const Eigen::Affine3d position_in_world=Eigen::Affine3d::Identity());
     ~Sai2Model ();
@@ -70,8 +70,8 @@ public:
     /**
      * @brief Computes the modified Newton-Euler Algorithm as described in
      * '''
-     * De Luca, A., & Ferrajoli, L. (2009, May). 
-     * A modified Newton-Euler method for dynamic computations in robot fault detection and control. 
+     * De Luca, A., & Ferrajoli, L. (2009, May).
+     * A modified Newton-Euler method for dynamic computations in robot fault detection and control.
      * In Robotics and Automation, 2009. ICRA'09. IEEE International Conference on (pp. 3359-3364). IEEE.
      * '''
      * @tau                       return vector
@@ -81,7 +81,7 @@ public:
      * @param dqa                 auxiliary joint velocity
      * @param ddq                 joint acceleration
      */
-    void modifiedNewtonEuler(Eigen::VectorXd& tau, 
+    void modifiedNewtonEuler(Eigen::VectorXd& tau,
                                 const bool consider_gravity,
                                 const Eigen::VectorXd& q,
                                 const Eigen::VectorXd& dq,
@@ -311,8 +311,8 @@ public:
 
     /**
      * @brief      Computes the nullspace matrix of the task, consistent with the previous nullspace
-     *             Recomputes the dynamically consistent inverse and the task mass matrix at each call   
-     *  
+     *             Recomputes the dynamically consistent inverse and the task mass matrix at each call
+     *
      * @param      N              Matrix to which the nullspace matrix will be written
      * @param[in]  task_jacobian  The task jacobian
      * @param[in]  N_prec         The previous nullspace matrix
@@ -347,9 +347,9 @@ public:
                                     const Eigen::MatrixXd& task_jacobian,
                                     const Eigen::MatrixXd& N_prec);
 
-   
+
     /**
-     * @brief Computes the grasp matrix in the cases where there are 
+     * @brief Computes the grasp matrix in the cases where there are
      * 2, 3 or 4 contact points.
      * the external forces and moments are assumed to be in world frame
      * for 2 contact points, the output quantities are given in local frame, and the description of the local frame is given by R
@@ -372,7 +372,7 @@ public:
                      const Eigen::Vector3d center_point);
 
     /**
-     * @brief Computes the grasp matrix in the cases where there are 
+     * @brief Computes the grasp matrix in the cases where there are
      * 2, 3 or 4 contact points.
      * @param G  :  The grasp matrix that is going to be populated
      * @param R : the rotation matrix between the world frame and the frame attached to the object (useful when 2 contacts only)
