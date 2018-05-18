@@ -9,7 +9,7 @@ from geomstats.riemannian_metric import RiemannianMetric
 EPSILON = 1e-5
 
 
-# TODO(nina): unit tests
+# TODO(xxx): unit tests
 
 class ProductRiemannianMetric(RiemannianMetric):
     """

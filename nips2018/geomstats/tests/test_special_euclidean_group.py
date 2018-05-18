@@ -20,9 +20,9 @@ import tests.helper as helper
 # where it is relative to each element of the array
 RTOL = 1e-5
 
-# TODO(nina): factorize tests vectorization se3 and so3
-# TODO(nina): check docstrings
-# TODO(nina): add local functions to decrease the number of for loops
+# TODO(xxx): factorize tests vectorization se3 and so3
+# TODO(xxx): check docstrings
+# TODO(xxx): add local functions to decrease the number of for loops
 
 
 class TestSpecialEuclideanGroupMethods(unittest.TestCase):
@@ -158,7 +158,7 @@ class TestSpecialEuclideanGroupMethods(unittest.TestCase):
 
         # Note: by default, the rotation vector is inverted by
         # the function regularize when the angle of the rotation is pi.
-        # TODO(nina): should we modify this?
+        # TODO(xxx): should we modify this?
         angle_type = 'with_angle_pi'
         point = self.elements[angle_type]
         result = self.group.regularize(point)
@@ -709,7 +709,7 @@ class TestSpecialEuclideanGroupMethods(unittest.TestCase):
         and the group logarithm are inverse.
         Expect their composition to give the identity function.
         """
-        # TODO(nina): this test fails
+        # TODO(xxx): this test fails
         for base_point_type in self.elements:
             base_point = self.elements[base_point_type]
             for element_type in self.elements:
@@ -1178,7 +1178,7 @@ class TestSpecialEuclideanGroupMethods(unittest.TestCase):
         riemannian left logarithm are inverse.
         Expect their composition to give the identity function.
         """
-        # TODO(nina): this test fails.
+        # TODO(xxx): this test fails.
         for metric in [self.metrics['right_canonical'],
                        self.metrics['right_diag']]:
             for base_point_type in self.elements:
@@ -1203,7 +1203,7 @@ class TestSpecialEuclideanGroupMethods(unittest.TestCase):
         riemannian right logarithm are inverse.
         Expect their composition to give the identity function.
         """
-        # TODO(nina): This test fails
+        # TODO(xxx): This test fails
         angle_types = self.angles_close_to_pi
         # Canonical inner product on the lie algebra
         for metric in [self.metrics['right_canonical'],
@@ -1476,7 +1476,7 @@ class TestSpecialEuclideanGroupMethods(unittest.TestCase):
                             'with metric {}'.format(metric_type))
 
     def test_group_exponential_barycenter(self):
-        # TODO(nina): this test fails, the barycenter is not accurate.
+        # TODO(xxx): this test fails, the barycenter is not accurate.
         point_1 = self.group.random_uniform()
         points = gs.vstack([point_1, point_1])
         result_1 = self.group.group_exponential_barycenter(
