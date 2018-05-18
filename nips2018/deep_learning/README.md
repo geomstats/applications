@@ -1,4 +1,4 @@
-This example illustrate training of mnist on an hypersphere manifold.
+This example illustrates training of mnist on an hypersphere manifold.
 
 ## Installation
 
