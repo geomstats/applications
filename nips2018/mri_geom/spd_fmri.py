@@ -17,12 +17,12 @@ from sklearn.svm import SVC
 
 import time
 
-DIM_SPACE = 28
+N_NODES = 28
 RAND_SEED = 2018
-SPACE = spd_space.SPDMatricesSpace(n=DIM_SPACE)
+SPACE = spd_space.SPDMatricesSpace(n=N_NODES)
 CORR_THRESH = 0.1
 GAMMA = 1.0
-NB_GRAPHS = 86
+N_GRAPHS = 86
 SIGMAS = list(np.arange(0.5, 20, 0.5))
 DISTANCES = ['log_euclidean', 'frobenius', 'riemannian']
 TRAIN_SIZE = 0.85
@@ -38,8 +38,8 @@ def import_data():
     mapping = pd.DataFrame.from_csv('add_info/' +
                                     'rs_fmri_fnc_mapping.csv')
     graph_labels = pd.DataFrame.from_csv('data/train_labels.csv')
-    all_graphs = [None] * NB_GRAPHS
-    all_targets = np.zeros(NB_GRAPHS)
+    all_graphs = [None] * N_GRAPHS
+    all_targets = np.zeros(N_GRAPHS)
 
     def create_connectome(graph_id, mapping):
         u = np.zeros((DIM_SPACE, DIM_SPACE))
@@ -51,7 +51,7 @@ def import_data():
             u = np.multiply(u, (u > CORR_THRESH))
         return np.abs(u + u.T)
 
-    for graph_id in range(NB_GRAPHS):
+    for graph_id in range(N_GRAPHS):
         all_graphs[graph_id] = create_connectome(graph_id, mapping)
         all_targets[graph_id] = int(graph_labels.loc[graphs.index[graph_id], 'Class'])
 
@@ -60,7 +60,7 @@ def import_data():
     np.random.seed(RAND_SEED)
     index_train = list(range(NB_GRAPHS))
     np.random.shuffle(index_train)
-    stop = int(TRAIN_SIZE * NB_GRAPHS)
+    stop = int(TRAIN_SIZE * N_GRAPHS)
     labels = all_targets[index_train]
     return (graphs.iloc[:, index_train], [all_graphs[t] for t in index_train],
             labels, stop, index_train)
@@ -122,7 +122,7 @@ def fit_kernel_cv(log_euclidean_distance, labels,
 
 
 def compute_similarities(all_graphs, type_dist):
-    distance = np.zeros((NB_GRAPHS, NB_GRAPHS))
+    distance = np.zeros((N_GRAPHS, N_GRAPHS))
     for c, g in enumerate(all_graphs):
             hat_l1 = laplacian(g) + GAMMA * np.eye(DIM_SPACE)
             lambda2, u = np.linalg.eigh(hat_l1)
@@ -141,7 +141,7 @@ def compute_similarities(all_graphs, type_dist):
 def classify_graphs():
     time_alg = {}
     graphs, all_graphs, labels, stop, index_train = import_data()
-    distance = {type_dist: np.zeros((NB_GRAPHS, NB_GRAPHS))
+    distance = {type_dist: np.zeros((N_GRAPHS, N_GRAPHS))
                 for type_dist in DISTANCES}
 
     tic = time.time()
@@ -208,4 +208,5 @@ if __name__ == '__main__':
         linkage = hc.linkage(kernel_dist, method='average')
         sb.clustermap(kernel_dist, row_linkage=linkage, col_linkage=linkage,
                       cmap='coolwarm', xticklabels=labels, yticklabels=labels)
-    plt.show()
+        plt.title('Clustermap for the ' + type_distance + ' distance')
+        plt.show()
