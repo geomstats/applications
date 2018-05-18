@@ -1,4 +1,4 @@
-geomstats
+geomstats>=1.9
 matplotlib
 numpy
 pandas

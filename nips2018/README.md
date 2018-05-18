@@ -22,12 +22,16 @@ nose2
 
 ### Examples
 
+#### Gradient Descent on Hypersphere
+
 The easiest example to launch from the paper is the optimization on the hypersphere:
 
 ```
 # from the root of your unziped directory
 python3 geomstats/examples/gradient_descent_s2.py
 ```
+
+#### Brain Connectome Analysis
 
 The next example to try out is the brain connectome one:
 
@@ -37,6 +41,8 @@ pip3 install -r brain_connectome/requirements.txt
 python3 brain_connectome/spd_mri.py
 ```
 
+#### Robotics Example
+
 The robotics example is a little bit more involved. It has its own README.md file and corresponding instructions. You will
 need a C++ compilation toolchain.
 
@@ -44,6 +50,8 @@ need a C++ compilation toolchain.
 # from the root of your unziped directory
 cat robotics/README.md
 ```
+
+#### Training MNIST on the Hypersphere
 
 The deep learning on the hypersphere example requires a tensorflow patch and installing a modified version of keras. There is also a README.md file
 ```
