@@ -1,7 +1,7 @@
 """Computations on the Lie group of 3D rotations."""
 
-# TODO(nina): Rename modules to make imports cleaner?
-# TODO(nina): make code robust to different types and input structures
+# TODO(xxx): Rename modules to make imports cleaner?
+# TODO(xxx): make code robust to different types and input structures
 from geomstats.embedded_manifold import EmbeddedManifold
 from geomstats.general_linear_group import GeneralLinearGroup
 from geomstats.lie_group import LieGroup
@@ -168,7 +168,7 @@ class SpecialOrthogonalGroup(LieGroup, EmbeddedManifold):
             for i in range(n_rot_vecs):
                 regularized_rot_vec[i, :] = norms_ratio[i] * rot_vec[i]
         else:
-            # TODO(nina): regularization needed in nD?
+            # TODO(xxx): regularization needed in nD?
             regularized_rot_vec = rot_vec
 
         assert regularized_rot_vec.ndim == 2
@@ -215,7 +215,7 @@ class SpecialOrthogonalGroup(LieGroup, EmbeddedManifold):
             regularized_vec[mask_else] = (regularized_vec[mask_else]
                                           / coef[mask_else])
         else:
-            # TODO(nina): regularization needed in nD?
+            # TODO(xxx): regularization needed in nD?
             regularized_vec = tangent_vec
 
         return regularized_vec
@@ -253,7 +253,7 @@ class SpecialOrthogonalGroup(LieGroup, EmbeddedManifold):
             regularized_tangent_vec = gs.squeeze(regularized_tangent_vec,
                                                  axis=1)
         else:
-            # TODO(nina): is regularization needed in nD?
+            # TODO(xxx): is regularization needed in nD?
             regularized_tangent_vec = tangent_vec
         return regularized_tangent_vec
 
@@ -471,7 +471,7 @@ class SpecialOrthogonalGroup(LieGroup, EmbeddedManifold):
         rot_mat = gs.zeros((n_quaternions,) + (self.n,) * 2)
 
         for i in range(n_quaternions):
-            # TODO(nina): vectorize by applying the composition of
+            # TODO(xxx): vectorize by applying the composition of
             # quaternions to the identity matrix
             column_1 = [a[i] ** 2 + b[i] ** 2 - c[i] ** 2 - d[i] ** 2,
                         2 * b[i] * c[i] - 2 * a[i] * d[i],

@@ -11,11 +11,12 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
+import numpy as np
 from geomstats.hypersphere import Hypersphere
 
 batch_size = 128
 num_classes = 10
-epochs = 12
+epochs = 2
 
 # input image dimensions
 img_rows, img_cols = 28, 28
@@ -46,14 +47,12 @@ y_test = keras.utils.to_categorical(y_test, num_classes)
 
 model = Sequential()
 
-kernel_size = (3, 3)
-
-hypersphere_dimension = 18
-model.add(Conv2D(32, kernel_size=kernel_size,
+hypersphere_dimension = 17
+model.add(Conv2D(32, kernel_size=(3, 3),
                  activation='relu',
                  input_shape=input_shape,
                  kernel_manifold=Hypersphere(hypersphere_dimension)))
-model.add(Conv2D(64, (3, 3),
+model.add(Conv2D(64, kernel_size=(3, 3),
                  activation='relu',
                  kernel_manifold=Hypersphere(hypersphere_dimension)))
 model.add(MaxPooling2D(pool_size=(2, 2)))
@@ -67,12 +66,23 @@ model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer=keras.optimizers.SGD(lr=0.1),
               metrics=['accuracy'])
 
+conv_weights_cnn = model.get_weights()[2]
+norms_before_training = np.linalg.norm(
+        conv_weights_cnn.reshape(hypersphere_dimension+1, -1), axis=0)
 print(model.fit(x_train, y_train,
                 batch_size=batch_size,
-                epochs=12,
+                epochs=epochs,
                 verbose=1,
                 validation_data=(x_test, y_test)))
 
 score = model.evaluate(x_test, y_test, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
+
+# Make sure the norms of the weights are the same before and after training
+# meaning that we stayed on the hypersphere.
+conv_weights_cnn = model.get_weights()[2]
+norms_after_training = np.linalg.norm(
+        conv_weights_cnn.reshape(hypersphere_dimension+1, -1), axis=0)
+np.testing.assert_array_almost_equal(norms_before_training,
+        norms_after_training, decimal=2)

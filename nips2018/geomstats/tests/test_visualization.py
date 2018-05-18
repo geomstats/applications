@@ -15,7 +15,7 @@ SE3_GROUP = SpecialEuclideanGroup(n=3)
 S2 = Hypersphere(dimension=2)
 
 
-# TODO(nina): add tests for examples
+# TODO(xxx): add tests for examples
 
 class TestVisualizationMethods(unittest.TestCase):
     _multiprocess_can_split_ = True

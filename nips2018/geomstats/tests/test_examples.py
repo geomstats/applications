@@ -39,11 +39,11 @@ class TestExamples(unittest.TestCase):
     def test_plot_geodesics_so3(self):
         plot_geodesics_so3.main()
 
-    # TODO(nina): this test fails
+    # TODO(xxx): this test fails
     # def test_plot_grid_h2(self):
     #    plot_grid_h2.main()
 
-    # TODO(johmathe): this test fails
+    # TODO(xxx): this test fails
     # def test_gradient_descent_s2(self):
     #     gradient_descent_s2.main()
 

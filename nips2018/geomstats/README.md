@@ -3,7 +3,7 @@
 
 Computations and statistics on manifolds with geometric structures.
 
-<img src="https://raw.githubusercontent.com/ninamiolane/geomstats/master/examples/imgs/gradient_descent.gif" width=384 height=384><img src="https://raw.githubusercontent.com/ninamiolane/geomstats/master/examples/imgs/h2_grid.png" width=256 height=256>
+<img src="https://raw.githubusercontent.com/xxxxxx/geomstats/master/examples/imgs/gradient_descent.gif" width=384 height=384><img src="https://raw.githubusercontent.com/xxxxxx/geomstats/master/examples/imgs/h2_grid.png" width=256 height=256>
 
 
 ## Installation
@@ -31,6 +31,4 @@ nose2
 
 ## Authors & Contributors
 
-* Nina Miolane
-* Xavier Pennec
-* Johan Mathe
+* XXX
