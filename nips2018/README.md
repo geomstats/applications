@@ -1,7 +1,7 @@
+# Geomstats Paper Supplementary Materials
 You've just found the code and various examples for the NIP2018 geomstats paper!
 
-These have been tested on Mac OS X 10.13.2 and linux Ubuntu 16.04. The
-deep learning example is currently the only one which works on a GPU.
+These have been tested on Mac OS X 10.13.2 and linux Ubuntu 16.04.
 
 ## Geomstats
 
@@ -9,8 +9,7 @@ The geomstats directory contains the code for the geomstats library. You can ins
 
 ```
 cd geomstats
-sudo pip3 install -r requirements.txt
-python3 setup.py install
+sudo python3 setup.py install
 ```
 
 You can launch the unit tests as follow:
@@ -60,8 +59,9 @@ cat robotics/README.md
 
 #### Training MNIST on the Hypersphere
 
-The deep learning on the hypersphere example requires a tensorflow patch and installing a modified version of keras. There is also a README.md file
+The deep learning on the hypersphere example requires a tensorflow patch and installing a modified version of keras.
 ```
+# from the root of your unziped directory
 cat deep_learning/README.md
 ```
 

@@ -1,15 +1,10 @@
-## Geomstats for Graph Classification ##
+## Geomstats for Graph Classification
 
 This example shows how to leverage the Riemannian geometry for a brain connectome  classification challenge. The dataset consists in the resting-state fMRIs of 86 patients  at 28 Regions Of Interest (ROIs), and the goal is to compare  and classify the induced graph regularized laplacians (a special case of SPD matrices).
 
-To run the example from the geomstat directory, enter in the terminal:
-
+# Running the example
 ```
-cd examples/nips2018/mri_geom
-python spd_fmri.py
+# Install dependencies
+python3 install -r requirements.txt
+python3 spd_fmri.py
 ```
-
-
-Dependencies:
-+ pandas 
-+ seaborn
