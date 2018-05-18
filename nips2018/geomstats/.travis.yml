@@ -1,0 +1,21 @@
+sudo: false
+dist: trusty
+cache: pip
+language: python
+python:
+    - "3.4"
+    - "3.5"
+    - "3.5-dev"
+    - "3.6"
+    - "3.6-dev"
+
+# TODO: Add the test for python 3.3
+
+install:
+    - pip install --upgrade pip setuptools wheel
+    - pip install -r requirements.txt --only-binary=numpy,scipy
+script:
+    - nose2 --with-coverage --verbose
+
+after_success:
+    - codecov
