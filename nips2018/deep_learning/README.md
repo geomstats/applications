@@ -1,4 +1,4 @@
-This example illustrates training of mnist on an hypersphere manifold.
+This example illustrates training of MNIST on an hypersphere manifold.
 
 ## Installation
 
@@ -17,5 +17,5 @@ sudo python3 setup.py install
 ## Running
 
 ```
-python3 mnist_hypersphere.py
+./run.sh
 ```
