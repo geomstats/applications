@@ -58,7 +58,7 @@ def import_data():
     all_targets = np.array(all_targets)
 
     np.random.seed(RAND_SEED)
-    index_train = list(range(N_NODES))
+    index_train = list(range(N_GRAPHS))
     np.random.shuffle(index_train)
     stop = int(TRAIN_SIZE * N_GRAPHS)
     labels = all_targets[index_train]
@@ -195,9 +195,9 @@ if __name__ == '__main__':
     for type_dist in DISTANCES:
         plt.plot(SIGMAS, mean_acc[type_dist],
                  label=type_dist + ' \nDistance')
-    plt.legend(loc='center left', bbox_to_anchor=(1.0, 0.5), fontsize=18)
-    plt.xlabel(r'$\sigma$', fontsize=24)
-    plt.ylabel(r'CV accuracy', fontsize=20)
+    plt.legend()
+    plt.xlabel(r'$\sigma$')
+    plt.ylabel(r'CV accuracy')
     plt.show()
 
     # Plot Clustermap representation
@@ -206,7 +206,7 @@ if __name__ == '__main__':
         kernel_dist = np.exp(-np.square(distance_dict[type_dist])
                              / (sigma_chosen[type_dist]**2))
         linkage = hc.linkage(kernel_dist, method='average')
-        sb.clustermap(kernel_dist, row_linkage=linkage, col_linkage=linkage,
-                      cmap='coolwarm', xticklabels=labels, yticklabels=labels)
-        plt.title('Clustermap for the ' + type_distance + ' distance')
+        g= sb.clustermap(kernel_dist, row_linkage=linkage, col_linkage=linkage,
+                         cmap='coolwarm', xticklabels=labels, yticklabels=labels)
+        g.fig.suptitle('Clustermap for the ' + type_dist + ' distance')
         plt.show()
