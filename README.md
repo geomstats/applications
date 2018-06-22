@@ -2,7 +2,7 @@
 Examples for Geomstats
 
 # Contributors
-Claire Donnat
-Mikael Jorda
-Johan Mathe
-Nina Miolane
+Claire Donnat  
+Mikael Jorda  
+Johan Mathe  
+Nina Miolane  
