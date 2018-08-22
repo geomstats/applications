@@ -35,7 +35,12 @@ def closest_neighbor(point, neighbors, space=None):
     """
     Find closest neighbor of point among neighbors.
     """
-    if space == 'S1':
+    if space not in IMPLEMENTED:
+        raise NotImplementedError(
+                'The closest neighbor function is not implemented'
+                ' for space {}. The spaces available'
+                ' are: {}.'.format(space, IMPLEMENTED))
+    elif space == 'S1':
         metric = HypersphereMetric(dimension=1)
     else:
         metric = HypersphereMetric(dimension=2)
@@ -44,6 +49,69 @@ def closest_neighbor(point, neighbors, space=None):
     index_closest_neighbor = dist.argmin()
 
     return index_closest_neighbor
+
+
+def diameter_of_data(points, space=None):
+    """
+    Compute the two points that are farthest away from each other in points.
+    """
+    if space not in IMPLEMENTED:
+        raise NotImplementedError(
+                'The diameter function is not implemented'
+                ' for space {}. The spaces available'
+                ' are: {}.'.format(space, IMPLEMENTED))
+    elif space == 'S1':
+        metric = HypersphereMetric(dimension=1)
+    else:
+        metric = HypersphereMetric(dimension=2)
+
+    diameter = 0.0
+    n_points = points.shape[0]
+
+    for i in range(n_points-1):
+        dist_to_neighbors = metric.dist(points[i, :], points[i+1:, :])
+        dist_to_farthest_neighbor = dist_to_neighbors.max()
+        diameter = np.maximum(diameter, dist_to_farthest_neighbor * 2)
+
+    return diameter
+
+
+def karcher_flow(points, space=None, tolerance=TOLERANCE):
+    """
+    Compute the Karcher mean of points using a Karcher flow algorithm.
+    Return :
+        - the karcher mean
+        - the number of steps needed to converge.
+    """
+    if space not in IMPLEMENTED:
+        raise NotImplementedError(
+                'The Karcher mean function is not implemented'
+                ' for space {}. The spaces available for Karcher flow'
+                ' are: {}.'.format(space, IMPLEMENTED))
+    elif space == 'S1':
+        metric = HypersphereMetric(dimension=1)
+    else:
+        metric = HypersphereMetric(dimension=2)
+
+    karcher_mean = sample_from(points)
+
+    n_points = points.shape[0]
+    gap = 1.0
+    step = 0
+    while gap > tolerance:
+        tangent_vectors = np.zeros(points.shape)
+
+        for i in range(n_points):
+            tangent_vectors[i, :] = metric.log(points[i, :], karcher_mean)
+
+        tan_vec_update = np.sum(tangent_vectors, axis=0) / n_points
+        karcher_mean_updated = metric.exp(tan_vec_update, karcher_mean)
+
+        gap = metric.dist(karcher_mean, karcher_mean_updated)
+        karcher_mean = karcher_mean_updated
+        step += 1
+
+    return karcher_mean, step
 
 
 def optimal_quantization(points, n_centers=10, space=None, n_repetition=20,
