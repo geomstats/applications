@@ -18,11 +18,10 @@ class TestOptimalQuantization(unittest.TestCase):
 
     def setUp(self):
         np.random.seed(1234)
-        self.space = Hypersphere(dimension=2)
-        self.space_string = 'S2'
+        self.space = 'S2'
         self.metric = HypersphereMetric(dimension=2)
         self.n_points = 1000
-        self.points = self.space.random_von_mises_fisher(
+        self.points = Hypersphere(dimension=2).random_von_mises_fisher(
                 kappa=10,
                 n_samples=self.n_points)
 
@@ -43,7 +42,7 @@ class TestOptimalQuantization(unittest.TestCase):
         """
         point = self.points[0, :]
         neighbors = self.points[1:, :]
-        index = oq.closest_neighbor(point, neighbors, self.space_string)
+        index = oq.closest_neighbor(point, neighbors, self.space)
         closest_neighbor = self.points[index, :]
         result = False
         for i in range(self.n_points):
@@ -58,7 +57,7 @@ class TestOptimalQuantization(unittest.TestCase):
         2) that optimal quantization yields the same result as
         the karcher flow algorithm when we look for one center.
         """
-        karcher_mean, n_steps = oq.karcher_flow(self.points, self.space_string)
+        karcher_mean, n_steps = oq.karcher_flow(self.points, self.space)
         tangent_vectors = np.zeros(self.points.shape)
         for i in range(self.n_points):
             tangent_vectors[i, :] = self.metric.log(
@@ -71,10 +70,10 @@ class TestOptimalQuantization(unittest.TestCase):
 
         n_centers = 1
         centers, weights, clustering, n_steps = oq.optimal_quantization(
-            self.points, n_centers, self.space_string
+            self.points, n_centers, self.space
             )
         error = self.metric.dist(karcher_mean, centers)
-        diameter = oq.diameter_of_data(self.points, self.space_string)
+        diameter = oq.diameter_of_data(self.points, self.space)
         result = error / diameter
         expected = 0.0
 
