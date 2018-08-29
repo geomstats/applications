@@ -40,7 +40,7 @@ def optimal_quantization(points, n_centers=10, space=None, n_repetitions=20,
     Return :
         - n_centers centers
         - n_centers weights between 0 and 1
-        - an array of labels defining a clustering
+        - a dictionary containing the clusters
         - the number of steps needed to converge.
     """
     if space not in IMPLEMENTED:
