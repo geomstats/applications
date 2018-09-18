@@ -4,8 +4,8 @@ on the sphere
 """
 
 import matplotlib.pyplot as plt
-import numpy as np
 
+import geomstats.backend as gs
 import geomstats.visualization as visualization
 import quantization.optimal_quantization as oq
 
@@ -35,10 +35,10 @@ def main():
 
     plt.figure(1)
     ax = plt.subplot(111, projection="3d", aspect="equal")
-    color = np.random.rand(N_CENTERS, 3)
+    color = gs.random.rand(N_CENTERS, 3)
     for i in range(N_CENTERS):
         sphere = visualization.Sphere()
-        cluster_i = np.vstack([point for point in clusters[i]])
+        cluster_i = gs.vstack([point for point in clusters[i]])
         sphere.add_points(cluster_i)
         sphere.draw(ax=ax, c=color[i, :])
 
