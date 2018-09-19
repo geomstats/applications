@@ -20,7 +20,6 @@ class TestOptimalQuantization(unittest.TestCase):
 
     def setUp(self):
         gs.random.seed(1234)
-        self.space = 'S2'
         self.metric = HypersphereMetric(dimension=2)
         self.n_points = 1000
         self.points = Hypersphere(dimension=2).random_von_mises_fisher(
@@ -47,7 +46,7 @@ class TestOptimalQuantization(unittest.TestCase):
         n_centers = 1
         mean = self.metric.mean(self.points)
         centers, weights, clusters, n_iterations = oq.optimal_quantization(
-            self.points, n_centers, self.space
+            points=self.points, metric=self.metric, n_centers=n_centers
             )
         error = self.metric.dist(mean, centers)
         diameter = self.metric.diameter(self.points)
