@@ -5,7 +5,6 @@ on the sphere
 
 import matplotlib.pyplot as plt
 
-import geomstats.backend as gs
 import geomstats.visualization as visualization
 import quantization.optimal_quantization as oq
 
@@ -20,7 +19,6 @@ KAPPA = 10
 
 
 def main():
-
     points = SPHERE2.random_von_mises_fisher(kappa=KAPPA, n_samples=N_POINTS)
 
     centers, weights, clusters, n_steps = oq.optimal_quantization(
@@ -30,20 +28,16 @@ def main():
 
     plt.figure(0)
     ax = plt.subplot(111, projection="3d", aspect="equal")
-    visualization.plot(centers, ax, space='S2', c='r')
+    visualization.plot(points=centers, ax=ax, space='S2', c='r')
     plt.show()
 
     plt.figure(1)
     ax = plt.subplot(111, projection="3d", aspect="equal")
-    color = gs.random.rand(N_CENTERS, 3)
+    sphere = visualization.Sphere()
+    sphere.draw(ax=ax)
     for i in range(N_CENTERS):
-        cluster_i = gs.vstack([point for point in clusters[i]])
-        sphere = visualization.Sphere()
-        sphere.add_points(cluster_i)
-        if i == 0:
-            sphere.draw(ax=ax, c=color[i, :])
-        else:
-            sphere.draw_points(ax=ax, c=color[i, :])
+        sphere.add_points(clusters[i])
+    sphere.draw_points(ax=ax)
 
 
 if __name__ == "__main__":

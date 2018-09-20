@@ -12,9 +12,10 @@ to these points yields a K-means type clustering of the dataset.
 
 import geomstats.backend as gs
 
-
+N_CENTERS = 10
 TOLERANCE = 1e-5
-IMPLEMENTED = ('S1', 'S2')
+N_REPETITIONS = 20
+N_MAX_ITERATIONS = 50000
 
 # TODO(alice): Consider adding optimal_quantization
 # as a method of the class RiemannianMetric.
@@ -33,8 +34,10 @@ def sample_from(points, n_samples=1):
     return sample
 
 
-def optimal_quantization(points, metric, n_centers=10, n_repetitions=20,
-                         tolerance=TOLERANCE, n_max_iterations=50000):
+def optimal_quantization(points, metric, n_centers=N_CENTERS,
+                         n_repetitions=N_REPETITIONS,
+                         tolerance=TOLERANCE,
+                         n_max_iterations=N_MAX_ITERATIONS):
     """
     Compute the optimal approximation of points by a smaller number
     of weighted centers using the Competitive Learning Riemannian
@@ -45,7 +48,9 @@ def optimal_quantization(points, metric, n_centers=10, n_repetitions=20,
     Return :
         - n_centers centers
         - n_centers weights between 0 and 1
-        - a dictionary containing the clusters
+        - a dictionary containing the clusters, where each key is the
+          cluster index, and its value is the lists of points belonging
+          to the cluster
         - the number of steps needed to converge.
     """
     centers = sample_from(points, n_centers)

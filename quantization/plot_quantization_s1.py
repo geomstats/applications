@@ -3,6 +3,8 @@ Plot the result of optimal quantization of the uniform distribution
 on the circle.
 """
 
+import matplotlib.pyplot as plt
+
 import geomstats.visualization as visualization
 import quantization.optimal_quantization as oq
 
@@ -19,11 +21,20 @@ TOLERANCE = 1e-6
 def main():
     points = CIRCLE.random_uniform(n_samples=N_POINTS, bound=None)
 
-    centers, weights, clustering, n_iterations = oq.optimal_quantization(
+    centers, weights, clusters, n_iterations = oq.optimal_quantization(
                 points=points, metric=METRIC, n_centers=N_CENTERS,
                 n_repetitions=N_REPETITIONS, tolerance=TOLERANCE
                 )
-    visualization.plot(centers, space='S1', color='red')
+
+    plt.figure(0)
+    visualization.plot(points=centers, space='S1', color='red')
+
+    plt.figure(1)
+    circle = visualization.Circle()
+    circle.draw()
+    for i in range(N_CENTERS):
+        circle.add_points(clusters[i])
+    circle.draw_points()
 
 
 if __name__ == "__main__":
