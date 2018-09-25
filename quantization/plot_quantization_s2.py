@@ -36,8 +36,7 @@ def main():
     sphere = visualization.Sphere()
     sphere.draw(ax=ax)
     for i in range(N_CENTERS):
-        sphere.add_points(clusters[i])
-    sphere.draw_points(ax=ax)
+        sphere.draw_points(ax=ax, points=clusters[i])
 
 
 if __name__ == "__main__":

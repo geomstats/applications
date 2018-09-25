@@ -33,8 +33,7 @@ def main():
     circle = visualization.Circle()
     circle.draw()
     for i in range(N_CENTERS):
-        circle.add_points(clusters[i])
-    circle.draw_points()
+        circle.draw_points(points=clusters[i])
 
 
 if __name__ == "__main__":
