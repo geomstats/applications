@@ -45,16 +45,6 @@ The deep learning example requires a tensorflow patch and installing a modified 
 cat deep_learning/README.md
 ```
 
-### Riemannian Quantization
-
-We consider here optimal quantization, an algorithm which seeks to find the best approximation, in the sense of the Wasserstein distance, of a probability distribution $\mu$ by a discrete one $\hat\mu_n$ supported by a finite number $n$ of points.
-
-```
-# from the root of your unziped directory
-python3 quantization/plot_quantization_s2.py
-```
-
-
 Enjoy :)
 
 # Contributors
