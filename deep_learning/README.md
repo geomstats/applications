@@ -1,8 +1,8 @@
-This example illustrates training of MNIST on an hypersphere manifold.
+This application illustrates training of MNIST on an hypersphere manifold.
 
 ## Installation
 
-The installation of this example is currently quite involved. You will need to:
+The installation of this application is currently quite involved. You will need to:
 
 - Update tensorflow from a patch file in this repository (re-compiling would be a nightmare - this solution is a hack but it is the least painful path for now.). You will also need a tensorflow version 1.8.
 

@@ -1,11 +1,11 @@
-# Geomstats Robotics Example
+# Geomstats Robotics Application
 
-This is a simulation and controller of a robot to use with geomstats example robot_so3.py.
+This is a simulation and controller of a robot to use with geomstats application robot_so3.py.
 It uses [gazebo](http://gazebosim.org/) for the simulation and Stanford Robotics Lab software for the control part.
 
-The example runs a simulation and controller of a KUKA IIWA14 robot. The controller is an operational space position and orientation controller at the end effector of the robot with a nullspace pose task that keeps the elbow up.
+The application runs a simulation and controller of a KUKA IIWA14 robot. The controller is an operational space position and orientation controller at the end effector of the robot with a nullspace pose task that keeps the elbow up.
 
-The controller reads the desired position and orientation from a redis server, populated by geomstat examples
+The controller reads the desired position and orientation from a redis server, populated by geomstat applications
 
 ## Dependencies
 This application depends on:
