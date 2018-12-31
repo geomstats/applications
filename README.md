@@ -1,8 +1,6 @@
 # Applications
 Applications for Geomstats
 
-These have been tested on Mac OS X 10.13.2 and linux Ubuntu 16.04.
-
 #### Brain Connectome Analysis
 
 We consider the fMRI data from the 2014 MLSP Schizophrenia Classification challenge, consisting
@@ -45,7 +43,7 @@ The deep learning application requires a tensorflow patch and installing a modif
 cat deep_learning/README.md
 ```
 
-### Training a Pose Estimation Network
+#### Training a Pose Estimation Network
 
 This example trains a pose estimation network using a SE3 Geodesic Loss function.
 
