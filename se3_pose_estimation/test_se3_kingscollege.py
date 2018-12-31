@@ -1,41 +1,44 @@
-'''
+"""
 Example Pose Estimation Network with SE3 loss function (Inference Script)
 Dataset: KingsCollege
 Network: Inception v1
 Loss Function: Geomstats SE(3) Loss
-'''
+"""
 
 import argparse
-import sys
 import os
 os.environ['GEOMSTATS_BACKEND'] = 'tensorflow'  # NOQA
+import sys
 
-import geomstats.lie_group as lie_group
 import tensorflow as tf
-
-from geomstats.special_euclidean_group import SpecialEuclideanGroup
 from tensorflow.contrib.slim.python.slim.nets import inception
 
+import geomstats.lie_group as lie_group
+from geomstats.special_euclidean_group import SpecialEuclideanGroup
 
 # command line argument parser
 ARGPARSER = argparse.ArgumentParser(
     description='Test SE3 PoseNet Inception v1 Model.')
 ARGPARSER.add_argument(
-    '--model_dir', type=str, default='./model',
+    '--model_dir',
+    type=str,
+    default='./model',
     help='The path to the model directory.')
 ARGPARSER.add_argument(
-    '--dataset', type=str, default='dataset_test.tfrecords',
+    '--dataset',
+    type=str,
+    default='dataset_test.tfrecords',
     help='The path to the TFRecords dataset.')
 ARGPARSER.add_argument(
-    '--cuda', type=str, default='0',
-    help='Specify default GPU to use.')
+    '--cuda', type=str, default='0', help='Specify default GPU to use.')
 ARGPARSER.add_argument(
-    '--debug', default=False, action='store_true',
+    '--debug',
+    default=False,
+    action='store_true',
     help="Enables debugging mode.")
 
 
 class PoseNetReader:
-
     def __init__(self, tfrecord_list):
 
         self.file_q = tf.train.string_input_producer(
@@ -49,8 +52,8 @@ class PoseNetReader:
         features = tf.parse_single_example(
             serialized_example,
             features={
-                'image':        tf.FixedLenFeature([], tf.string),
-                'pose':         tf.FixedLenFeature([], tf.string)
+                'image': tf.FixedLenFeature([], tf.string),
+                'pose': tf.FixedLenFeature([], tf.string)
             })
 
         image = tf.decode_raw(features['image'], tf.uint8)
@@ -63,10 +66,8 @@ class PoseNetReader:
         # to predefined size. To get more information look at the stackoverflow
         # question linked above.
 
-        # image = tf.image.resize_images(image, size=[224, 224])
-        image = tf.image.resize_image_with_crop_or_pad(image=image,
-                                                       target_height=224,
-                                                       target_width=224)
+        image = tf.image.resize_image_with_crop_or_pad(
+            image=image, target_height=224, target_width=224)
 
         return image, pose
 
@@ -85,9 +86,8 @@ def main(args):
     # Tensorboard's Graph visualization more convenient
     print('Making Model')
     with tf.name_scope('Model'):
-        py_x, _ = inception.inception_v1(tf.cast(image, tf.float32),
-                                         num_classes=6,
-                                         is_training=False)
+        py_x, _ = inception.inception_v1(
+            tf.cast(image, tf.float32), num_classes=6, is_training=False)
         # tanh(pred_angle) required to prevent infinite spins on rotation axis
         y_pred = tf.concat((tf.nn.tanh(py_x[:, :3]), py_x[:, 3:]), axis=1)
         loss = tf.reduce_mean(
