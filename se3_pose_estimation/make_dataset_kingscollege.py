@@ -1,4 +1,4 @@
-'''
+"""
 Original
 File: create_posenet_lmdb_dataset.py
 Link: https://git.io/fpPuw
@@ -10,7 +10,7 @@ Author: Benjamin Hou <bh1511@imperial.ac.ukm>
 
 Download KingsCollege Dataset:
 http://mi.eng.cam.ac.uk/projects/relocalisation/#dataset
-'''
+"""
 
 import argparse
 import imageio
@@ -23,6 +23,7 @@ import tensorflow as tf
 
 from skimage import exposure
 from tqdm import tqdm
+
 from geomstats.special_orthogonal_group import SpecialOrthogonalGroup
 
 

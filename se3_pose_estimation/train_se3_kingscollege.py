@@ -1,64 +1,76 @@
-'''
+"""
 Example Pose Estimation Network with SE3 loss function (Training Script)
 Dataset: KingsCollege
 Network: Inception v1
 Loss Function: Geomstats SE(3) Loss
-'''
+"""
 
 import argparse
-import sys
 import os
 os.environ['GEOMSTATS_BACKEND'] = 'tensorflow'  # NOQA
+import sys
 
 import numpy as np
-import geomstats.lie_group as lie_group
 import tensorflow as tf
 
-from geomstats.special_euclidean_group import SpecialEuclideanGroup
 from tensorflow.contrib.slim.python.slim.nets import inception
 from tqdm import tqdm
 
+import geomstats.lie_group as lie_group
+from geomstats.special_euclidean_group import SpecialEuclideanGroup
 
 # command line argument parser
 ARGPARSER = argparse.ArgumentParser(
     description='Train SE3 PoseNet Inception v1 Model.')
 ARGPARSER.add_argument(
-    '--batch_size', type=int, default=32,
-    help='Batch size to train.')
+    '--batch_size', type=int, default=32, help='Batch size to train.')
 ARGPARSER.add_argument(
-    '--init_lr', type=float, default=1e-4,
-    help='Initial Learning rate.')
+    '--init_lr', type=float, default=1e-4, help='Initial Learning rate.')
 ARGPARSER.add_argument(
-    '--max_iter', type=int, default=200000,
+    '--max_iter',
+    type=int,
+    default=200000,
     help='The number of iteration to train.')
 ARGPARSER.add_argument(
-    '--epsilon', type=float, default=np.finfo(np.float32).eps, # 1.1920929e-07
+    '--epsilon',
+    type=float,
+    default=np.finfo(np.float32).eps,
     help='Gradient Epsilon')
 ARGPARSER.add_argument(
-    '--snapshot', type=int, default=10000,
+    '--snapshot',
+    type=int,
+    default=10000,
     help='Save model weights every X iterations')
 ARGPARSER.add_argument(
-    '--dataset', type=str, default='dataset_train.tfrecords',
+    '--dataset',
+    type=str,
+    default='dataset_train.tfrecords',
     help='Training dataset')
 ARGPARSER.add_argument(
-    '--model_dir', type=str, default='./model',
+    '--model_dir',
+    type=str,
+    default='./model',
     help='The path to the model directory.')
 ARGPARSER.add_argument(
-    '--logs_path', type=str, default='./logs',
+    '--logs_path',
+    type=str,
+    default='./logs',
     help='The path to the logs directory.')
 ARGPARSER.add_argument(
-    '--resume', default=False, action='store_true',
+    '--resume',
+    default=False,
+    action='store_true',
     help="Resume training from previous saved checkpoint.")
 ARGPARSER.add_argument(
-    '--cuda', type=str, default='0',
-    help='Specify default GPU to use.')
+    '--cuda', type=str, default='0', help='Specify default GPU to use.')
 ARGPARSER.add_argument(
-    '--debug', default=False, action='store_true',
+    '--debug',
+    default=False,
+    action='store_true',
     help="Enables debugging mode.")
 
 
 class PoseNetReader:
-
     def __init__(self, tfrecord_list):
 
         self.file_q = tf.train.string_input_producer(tfrecord_list)
@@ -71,8 +83,8 @@ class PoseNetReader:
         features = tf.parse_single_example(
             serialized_example,
             features={
-                'image':        tf.FixedLenFeature([], tf.string),
-                'pose':         tf.FixedLenFeature([], tf.string)
+                'image': tf.FixedLenFeature([], tf.string),
+                'pose': tf.FixedLenFeature([], tf.string)
             })
 
         image = tf.decode_raw(features['image'], tf.uint8)
@@ -85,18 +97,16 @@ class PoseNetReader:
         # to predefined size. To get more information look at the stackoverflow
         # question linked above.
 
-        # image = tf.image.resize_images(image, size=[224, 224])
-        image = tf.image.resize_image_with_crop_or_pad(image=image,
-                                                       target_height=224,
-                                                       target_width=224)
+        image = tf.image.resize_image_with_crop_or_pad(
+            image=image, target_height=224, target_width=224)
 
-        image_batch , pose_batch = tf.train.shuffle_batch([image, pose],
-                                                          batch_size=batch_size,
-                                                          capacity=1024,
-                                                          num_threads=2,
-                                                          min_after_dequeue=10)
+        image_batch, pose_batch = tf.train.shuffle_batch([image, pose],
+                                                         batch_size=batch_size,
+                                                         capacity=1024,
+                                                         num_threads=2,
+                                                         min_after_dequeue=10)
 
-        return image_batch , pose_batch
+        return image_batch, pose_batch
 
 
 def main(args):
@@ -113,10 +123,12 @@ def main(args):
     # Tensorboard's Graph visualization more convenient
     print('Making Model')
     with tf.name_scope('Model'):
-        py_x, _ = inception.inception_v1(tf.cast(image, tf.float32), num_classes=6)
+        py_x, _ = inception.inception_v1(
+            tf.cast(image, tf.float32), num_classes=6)
         # tanh(pred_angle) required to prevent infinite spins on rotation axis
         y_pred = tf.concat((tf.nn.tanh(py_x[:, :3]), py_x[:, 3:]), axis=1)
-        loss = tf.reduce_mean(lie_group.loss(y_pred, y_true, SE3_GROUP, metric))
+        loss = tf.reduce_mean(
+            lie_group.loss(y_pred, y_true, SE3_GROUP, metric))
 
     print('Making Optimizer')
     with tf.name_scope('Adam'):
@@ -144,7 +156,8 @@ def main(args):
         threads = tf.train.start_queue_runners(coord=coord)
 
         # op to write logs to Tensorboard
-        summary_writer = tf.summary.FileWriter(FLAGS.logs_path, graph=tf.get_default_graph())
+        summary_writer = tf.summary.FileWriter(
+            FLAGS.logs_path, graph=tf.get_default_graph())
 
         saver = tf.train.Saver()
         if FLAGS.resume:
@@ -157,14 +170,16 @@ def main(args):
             train_range = tqdm(range(FLAGS.max_iter))
             for i in train_range:
 
-                _, _cost, summary = sess.run([train_op, loss, merged_summary_op])
+                _, _cost, summary = sess.run(
+                    [train_op, loss, merged_summary_op])
 
                 # Write logs at every iteration
                 train_range.set_description('Training: (loss=%g)' % _cost)
                 summary_writer.add_summary(summary, i)
 
                 if i % FLAGS.snapshot == 0:
-                    save_path = saver.save(sess, '{}/chkpt{}.ckpt'.format(FLAGS.model_dir, i))
+                    save_path = saver.save(
+                        sess, '{}/chkpt{}.ckpt'.format(FLAGS.model_dir, i))
 
         except KeyboardInterrupt:
             print('KeyboardInterrupt!')

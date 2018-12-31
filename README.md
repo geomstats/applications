@@ -45,11 +45,21 @@ The deep learning application requires a tensorflow patch and installing a modif
 cat deep_learning/README.md
 ```
 
+### Training a Pose Estimation Network
+
+This example trains a pose estimation network using a SE3 Geodesic Loss function.
+
+```
+# from the root of your unziped directory
+cat se3_pose_estimation/README.md
+```
+
 Enjoy :)
 
 # Contributors
 
 * Claire Donnat
+* Benjamin Hou
 * Mikael Jorda
 * Alice Le Brigant
 * Johan Mathe
