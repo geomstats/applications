@@ -4,22 +4,24 @@ brain connectomes represented by their SPD regularized Laplacian
 (with parameter GAMMA) into two classes: control vs people suffering
 from schizophrenia.
 """
-import geomstats.spd_matrices_space as spd_space
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy.cluster.hierarchy as hc
 import seaborn as sb
+import time
+
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.metrics import f1_score, precision_score, recall_score
 from sklearn.model_selection import KFold
 from sklearn.svm import SVC
 
-import time
+from geomstats.spd_matrices_space import SPDMatricesSpace
 
 N_NODES = 28
 RAND_SEED = 2018
-SPACE = spd_space.SPDMatricesSpace(n=N_NODES)
+SPACE = SPDMatricesSpace(n=N_NODES)
 CORR_THRESH = 0.1
 GAMMA = 1.0
 N_GRAPHS = 86
@@ -30,8 +32,8 @@ TRAIN_SIZE = 0.85
 
 def import_data():
     graphs = pd.read_csv('data/train_fnc.csv')
-    map_functional = pd.read_csv('add_info/comp_ind_fmri.csv',
-            index_col=None)
+    map_functional = pd.read_csv(
+        'add_info/comp_ind_fmri.csv', index_col=None)
     map_functional = map_functional['fMRI_comp_ind'].to_dict()
     map_functional_r = {v: k for k, v
                         in map_functional.items()}
@@ -53,7 +55,8 @@ def import_data():
 
     for graph_id in range(N_GRAPHS):
         all_graphs[graph_id] = create_connectome(graph_id, mapping)
-        all_targets[graph_id] = int(graph_labels.loc[graphs.index[graph_id], 'Class'])
+        all_targets[graph_id] = int(
+            graph_labels.loc[graphs.index[graph_id], 'Class'])
 
     all_targets = np.array(all_targets)
 
@@ -72,25 +75,25 @@ def laplacian(a):
 
 
 def frobenius(hat_l1, hat_l2):
-    return np.linalg.norm(spd_space.group_log(hat_l1).squeeze(0)
-                          - spd_space.group_log(hat_l2).squeeze(0),
-                          'fro')
+    # Rescaling to match the scale of the others.
+    dist = np.linalg.norm(hat_l1 - hat_l2, 'fro') / 1e5
+    return dist
 
 
 def riemannian(inv_l1, hat_l2):
-    return np.linalg.norm(inv_l1.dot(spd_space.group_log(hat_l2).squeeze(0).dot(inv_l1)),
-                          'fro')
+    log_2 = SPACE.embedding_manifold.group_log(hat_l2).squeeze(0)
+    return np.linalg.norm(inv_l1.dot(log_2.dot(inv_l1)), 'fro')
 
 
 def log_euclidean(hat_l1, hat_l2):
-    return np.linalg.norm(spd_space.group_log(hat_l1).squeeze(0)
-                          - spd_space.group_log(hat_l2).squeeze(0),
-                          'fro')
+    log_1 = SPACE.embedding_manifold.group_log(hat_l1).squeeze(0)
+    log_2 = SPACE.embedding_manifold.group_log(hat_l2).squeeze(0)
+    return np.linalg.norm(log_1 - log_2, 'fro')
 
 
 def fit_kernel_cv(log_euclidean_distance, labels,
                   sigma=None, verbose=False):
-    kf = KFold(n_splits=10)
+    kf = KFold(n_splits=5)
     perf = {}
     conf = {}
     nb_train = len(labels)
@@ -135,7 +138,8 @@ def compute_similarities(all_graphs, type_dist):
                     distance[c, j] = frobenius(hat_l1, hat_l2)
                 else:
                     distance[c, j] = riemannian(inv_l1, hat_l2)
-    return distance + distance.T
+    dist = distance + distance.T
+    return dist
 
 
 def classify_graphs():
@@ -157,8 +161,11 @@ def classify_graphs():
     for type_dist in DISTANCES:
         mean_acc[type_dist] = []
         for sigma in SIGMAS:
-            perf, conf = fit_kernel_cv(distance[type_dist][:stop, :stop], labels[:stop],
-                                       sigma, verbose=False)
+            perf, conf = fit_kernel_cv(
+                distance[type_dist][:stop, :stop],
+                labels[:stop],
+                sigma,
+                verbose=False)
             mean_acc[type_dist].append(np.mean([perf[k]['acc']
                                                 for k in perf.keys()]))
 
@@ -176,10 +183,11 @@ def classify_graphs():
         clf.fit(x, labels[:stop])
         model[type_dist] = clf
         y_test = clf.predict(x_test)
-        perf_final[type_dist] = {'acc': accuracy_score(labels[stop:], y_test),
-                                 'prec': precision_score(labels[stop:], y_test),
-                                 'f1': f1_score(labels[stop:], y_test),
-                                 'recall': recall_score(labels[stop:], y_test)}
+        perf_final[type_dist] = {
+            'acc': accuracy_score(labels[stop:], y_test),
+            'prec': precision_score(labels[stop:], y_test),
+            'f1': f1_score(labels[stop:], y_test),
+            'recall': recall_score(labels[stop:], y_test)}
 
     return distance, time_alg, perf_final, sigma_chosen, mean_acc, labels
 
@@ -202,11 +210,15 @@ if __name__ == '__main__':
 
     # Plot Clustermap representation
     for type_dist in DISTANCES:
-        plt.figure()
-        kernel_dist = np.exp(-np.square(distance_dict[type_dist])
-                             / (sigma_chosen[type_dist]**2))
-        linkage = hc.linkage(kernel_dist, method='average')
-        g= sb.clustermap(kernel_dist, row_linkage=linkage, col_linkage=linkage,
-                         cmap='coolwarm', xticklabels=labels, yticklabels=labels)
+        kernel_dist = 1 - np.exp(
+            -np.square(distance_dict[type_dist])
+            / (sigma_chosen[type_dist]**2))
+
+        linkage = hc.linkage(
+            kernel_dist[np.triu_indices(N_GRAPHS, 1)],
+            method='average')
+        g = sb.clustermap(
+            kernel_dist, row_linkage=linkage, col_linkage=linkage,
+            cmap='coolwarm', xticklabels=labels, yticklabels=labels)
         g.fig.suptitle('Clustermap for the ' + type_dist + ' distance')
         plt.show()
