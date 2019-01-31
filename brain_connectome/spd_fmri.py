@@ -74,21 +74,22 @@ def laplacian(a):
     return d-a
 
 
-def frobenius(hat_l1, hat_l2):
+def frobenius(mat_a, mat_b):
     # Rescaling to match the scale of the others.
-    dist = np.linalg.norm(hat_l1 - hat_l2, 'fro') / 1e5
+    dist = np.linalg.norm(mat_a - mat_b, 'fro') / 1e5
     return dist
 
 
-def riemannian(inv_l1, hat_l2):
-    log_2 = SPACE.embedding_manifold.group_log(hat_l2).squeeze(0)
-    return np.linalg.norm(inv_l1.dot(log_2.dot(inv_l1)), 'fro')
+def riemannian(mat_a, mat_b):
+    dist = SPACE.metric.dist(mat_a, mat_b)
+    return dist
 
 
-def log_euclidean(hat_l1, hat_l2):
-    log_1 = SPACE.embedding_manifold.group_log(hat_l1).squeeze(0)
-    log_2 = SPACE.embedding_manifold.group_log(hat_l2).squeeze(0)
-    return np.linalg.norm(log_1 - log_2, 'fro')
+def log_euclidean(mat_a, mat_b):
+    log_a = SPACE.embedding_manifold.group_log(mat_a).squeeze(0)
+    log_b = SPACE.embedding_manifold.group_log(mat_b).squeeze(0)
+    dist = np.linalg.norm(log_a - log_b, 'fro')
+    return dist
 
 
 def fit_kernel_cv(log_euclidean_distance, labels,
@@ -129,7 +130,6 @@ def compute_similarities(all_graphs, type_dist):
     for c, g in enumerate(all_graphs):
             hat_l1 = laplacian(g) + GAMMA * np.eye(N_NODES)
             lambda2, u = np.linalg.eigh(hat_l1)
-            inv_l1 = u.dot(np.diag(1.0/np.sqrt(lambda2)).dot(u.T))
             for j in range(c):
                 hat_l2 = laplacian(all_graphs[j]) + GAMMA * np.eye(N_NODES)
                 if type_dist == 'log_euclidean':
@@ -137,7 +137,7 @@ def compute_similarities(all_graphs, type_dist):
                 elif type_dist == 'frobenius':
                     distance[c, j] = frobenius(hat_l1, hat_l2)
                 else:
-                    distance[c, j] = riemannian(inv_l1, hat_l2)
+                    distance[c, j] = riemannian(hat_l1, hat_l2)
     dist = distance + distance.T
     return dist
 
