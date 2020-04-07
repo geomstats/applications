@@ -52,6 +52,29 @@ This example trains a pose estimation network using a SE3 Geodesic Loss function
 cat se3_pose_estimation/README.md
 ```
 
+
+#### Impact of the curvature on the empirical Fréchet mean estimation manifolds
+
+This application illustrates the modulation of the speed of convergence of the
+empirical Fréchet mean with the curvature in spheres and hyperbolic spaces described in 
+the [arXiv paper 1906.07418](https://arxiv.org/abs/1906.07418). The application is actually 
+the source-code to create the figures of this paper.  
+
+The variance of the Fréchet mean FM_n of a sample of n IID random variables of variance Var is 
+decreasing more slowly in a sphere than in a Euclidean space, and more quickly in a Hyperbolic space. 
+Two scripts of this application compare the speed of convergence in spheres and hyperbolic spaces to 
+the classical one in Euclidean spaces by computing the  modulation factor 
+alpha = Var( FM_n) / ( n * Var) for synthetic IID n-samples drawn from isotropic distributions 
+on hyper-spheres (bubble distributions) of different radii. 
+The last script computes the modulation factor for bootstrap n-samples drawn from a few real-world 
+empirical distributions on the sphere S2 taken from the book of Fisher, Lewis and Embleton 1987.
+
+```
+# from the root of your unziped directory
+cat modulation_empirical_frechet_mean/README.md
+```
+
+
 Enjoy :)
 
 # Contributors
