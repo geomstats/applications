@@ -4,12 +4,13 @@
 Impact of the curvature on the empirical Fréchet mean estimation manifolds.
 Experiments illustrating the modulation of the speed of convergence of the
 empirical Fréchet mean with the curvature in spheres and hyperbolic spaces
-described in the [paper](https://arxiv.org/abs/1906.07418).
+described in the [arXiv paper 1906.07418](https://arxiv.org/abs/1906.07418).
 
 ## Requirements
-- geomstats
+- geomstats-1.17 # use 1.18 to avoid a bug with 1 sample 
 - xlrd
-
+- matplotlib
+- numpy
 
 ## Acknowledgements
 
