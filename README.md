@@ -1,5 +1,6 @@
 # Applications
-Applications for Geomstats
+
+Applications for Geomstats that illustrate more involved uses of the package.
 
 #### Brain Connectome Analysis
 
@@ -13,6 +14,7 @@ Riemannian distance on the manifold of SPD matrices.
 
 ```
 # from the root of your unziped directory
+pip3 install geomstats==1.7
 cd brain_connectome
 pip3 install -r requirements.txt
 python3 spd_fmri.py
@@ -29,6 +31,7 @@ need a C++ compilation toolchain.
 
 ```
 # from the root of your unziped directory
+pip3 install geomstats==1.7
 cat robotics/README.md
 ```
 
@@ -49,6 +52,7 @@ This example trains a pose estimation network using a SE3 Geodesic Loss function
 
 ```
 # from the root of your unziped directory
+pip3 install geomstats==1.7
 cat se3_pose_estimation/README.md
 ```
 
