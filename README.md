@@ -55,8 +55,9 @@ cat deep_learning/README.md
 This example trains a pose estimation network using a SE3 Geodesic Loss function.
 
 ```
-# from the root of your unziped directory
 pip3 install geomstats==1.7
+
+# from the root of your unziped directory
 cat se3_pose_estimation/README.md
 ```
 
