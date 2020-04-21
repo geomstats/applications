@@ -13,8 +13,9 @@ represented as the SPD matrices of their regularized Laplacians. The similaritie
 Riemannian distance on the manifold of SPD matrices.
 
 ```
-# from the root of your unziped directory
 pip3 install geomstats==1.7
+
+# from the root of your unziped directory
 cd brain_connectome
 pip3 install -r requirements.txt
 python3 spd_fmri.py
@@ -30,8 +31,9 @@ The robotics application is a little bit more involved. It has its own README.md
 need a C++ compilation toolchain.
 
 ```
-# from the root of your unziped directory
 pip3 install geomstats==1.7
+
+# from the root of your unziped directory
 cat robotics/README.md
 ```
 
@@ -42,6 +44,8 @@ such that the stochastic gradient descent is done on the manifold through the Ex
 
 The deep learning application requires a tensorflow patch and installing a modified version of keras.
 ```
+pip3 install geomstats==1.7
+
 # from the root of your unziped directory
 cat deep_learning/README.md
 ```
