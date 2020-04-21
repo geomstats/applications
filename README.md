@@ -79,6 +79,8 @@ The last script computes the modulation factor for bootstrap n-samples drawn fro
 empirical distributions on the sphere S2 taken from the book of Fisher, Lewis and Embleton 1987.
 
 ```
+pip3 install geomstats==1.18
+
 # from the root of your unziped directory
 cat modulation_empirical_frechet_mean/README.md
 ```
